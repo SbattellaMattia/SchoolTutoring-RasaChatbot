@@ -1,13 +1,61 @@
 version: "3.1"
 
 rules:
+  # Saluti base
+  - rule: Saluta quando utente saluta
+    steps:
+      - intent: greet
+      - action: utter_greet
 
-- rule: Say goodbye anytime the user says goodbye
-  steps:
-  - intent: goodbye
-  - action: utter_goodbye
+  - rule: Saluta quando utente va via
+    steps:
+      - intent: goodbye
+      - action: utter_goodbye
 
-- rule: Say 'I am a bot' anytime the user challenges
-  steps:
-  - intent: bot_challenge
-  - action: utter_iamabot
+  - rule: Rispondi a bot challenge
+    steps:
+      - intent: bot_challenge
+      - action: utter_iamabot
+
+  # FAQ - Risposte dirette
+  - rule: Info materie
+    steps:
+      - intent: ask_subjects
+      - action: utter_subjects_info
+
+  - rule: Info prezzi
+    steps:
+      - intent: ask_prices
+      - action: utter_prices_info
+
+  - rule: Come funziona
+    steps:
+      - intent: ask_how_it_works
+      - action: utter_how_it_works
+
+  # Form prenotazione ripetizioni
+  - rule: Attiva form prenotazione
+    steps:
+      - intent: book_tutoring
+      - action: tutoring_booking_form
+      - active_loop: tutoring_booking_form
+
+  - rule: Submit form prenotazione
+    condition:
+      - active_loop: tutoring_booking_form
+    steps:
+      - action: tutoring_booking_form
+      - active_loop: null
+      - action: action_assign_tutor
+      - action: utter_submit
+
+  # Interruzione form
+  - rule: Interrompi prenotazione se utente nega
+    condition:
+      - active_loop: tutoring_booking_form
+    steps:
+      - intent: deny
+      - action: action_deactivate_loop
+      - active_loop: null
+      - action: utter_goodbye
+

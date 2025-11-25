@@ -1,0 +1,82 @@
+version: "3.1"
+
+slots:
+  materia:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: materia
+    
+  livello:
+    type: categorical
+    values: [elementari, medie, superiori, università]
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: livello
+  
+  modalita:
+    type: categorical
+    values: [presenza, online]
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: modalita
+  
+  data_lezione:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: data_lezione
+  
+  orario_lezione:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: orario_lezione
+  
+  durata:
+    type: categorical
+    values: ["1 ora", "1.5 ore", "2 ore"]
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: durata
+  
+  nome_studente:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: nome_studente
+  
+  email_studente:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: tutoring_booking_form
+            requested_slot: email_studente
+  
+  tutor_assegnato:
+    type: text
+    influence_conversation: false
+    mappings: []

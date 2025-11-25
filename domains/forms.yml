@@ -1,0 +1,14 @@
+version: "3.1"
+
+forms:
+  tutoring_booking_form:
+    required_slots:
+      - materia
+      - livello
+      - modalita
+      - data_lezione
+      - orario_lezione
+      - durata
+      - nome_studente
+      - email_studente
+

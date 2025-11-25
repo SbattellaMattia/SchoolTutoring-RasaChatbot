@@ -1,0 +1,6 @@
+nome,cognome,materie,livello,disponibilita,modalita,tariffa
+Marco,Rossi,"matematica,fisica",superiori-università,lun-ven 15-19,presenza-online,25
+Laura,Bianchi,"inglese,italiano",elementari-medie-superiori,lun-sab 14-20,online,20
+Giuseppe,Verdi,chimica,superiori-università,mar-gio 16-19,presenza,25
+Anna,Neri,"latino,greco",superiori,lun-ven 15-18,presenza-online,20
+Paolo,Gialli,informatica,tutti,lun-dom 10-22,online,22

@@ -1,0 +1,10 @@
+version: "3.1"
+
+# Il parametro carry_over_slots_to_new_session controlla se gli slot
+# (la "memoria" del bot) vengono mantenuti o cancellati quando inizia
+# una nuova sessione di conversazione o dopo 'session_expiration_time' minuti.
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: false
+
+ 

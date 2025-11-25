@@ -1,0 +1,49 @@
+version: "3.1"
+
+responses:
+  utter_greet:
+    - text: "Ciao! Sono l'assistente per prenotare ripetizioni. Come posso aiutarti?"
+    - text: "Benvenuto! Vuoi prenotare ripetizioni o hai bisogno di informazioni?"
+  
+  utter_goodbye:
+    - text: "Grazie per averci contattato! Buono studio!"
+    - text: "A presto! In bocca al lupo con lo studio!"
+  
+  utter_ask_materia:
+    - text: "Per quale materia ti servono ripetizioni?\n📚 Matematica\n🔬 Fisica\n⚗️ Chimica\n🇬🇧 Inglese\n📖 Italiano\n🏛️ Latino/Greco\n💻 Informatica\n💼 Economia"
+  
+  utter_ask_livello:
+    - text: "Che livello? (elementari, medie, superiori, università)"
+  
+  utter_ask_modalita:
+    - text: "Preferisci ripetizioni in presenza o online?"
+  
+  utter_ask_data_lezione:
+    - text: "Quando vorresti fare la lezione? (es. lunedì 27 novembre, domani)"
+  
+  utter_ask_orario_lezione:
+    - text: "A che ora? (es. 15:00, pomeriggio, mattina)"
+  
+  utter_ask_durata:
+    - text: "Quanto deve durare la lezione? (1 ora, 1.5 ore, 2 ore)"
+  
+  utter_ask_nome_studente:
+    - text: "Come ti chiami?"
+  
+  utter_ask_email_studente:
+    - text: "Qual è la tua email per confermarti la prenotazione?"
+  
+  utter_submit:
+    - text: "✅ Prenotazione confermata! Riceverai un'email di conferma a breve."
+  
+  utter_subjects_info:
+    - text: "Offriamo ripetizioni in: Matematica, Fisica, Chimica, Inglese, Italiano, Latino, Greco, Informatica, Economia. Per tutti i livelli!"
+  
+  utter_prices_info:
+    - text: "💰 Tariffe:\n- Elementari/Medie: 15€/ora\n- Superiori: 20€/ora\n- Università: 25€/ora\n\nSconto 10% per pacchetti da 10 ore!"
+  
+  utter_how_it_works:
+    - text: "È semplicissimo!\n1️⃣ Scegli materia e livello\n2️⃣ Indica quando vuoi la lezione\n3️⃣ Ti assegneremo un tutor qualificato\n4️⃣ Ricevi conferma via email\n\nVuoi prenotare ora?"
+  
+  utter_iamabot:
+    - text: "Sono un chatbot per prenotare ripetizioni. Posso aiutarti a trovare il tutor perfetto!"

@@ -1,0 +1,49 @@
+version: "3.1"
+
+nlu:
+  - intent: book_tutoring
+    examples: |
+      - vorrei prenotare ripetizioni
+      - ho bisogno di ripetizioni
+      - cerco un tutor
+      - voglio fare ripetizioni di matematica
+      - mi servono ripetizioni di inglese
+      - prenotazione ripetizioni
+      - devo recuperare in fisica
+      - ho bisogno di aiuto in chimica
+      - ripetizioni per domani
+      - cerco ripetizioni online
+      - lezioni private di informatica
+
+  - intent: ask_subjects
+    examples: |
+      - che materie fate
+      - quali materie offrite
+      - materie disponibili
+      - per quali materie fate ripetizioni
+      - fate ripetizioni di matematica?
+      - avete tutor per inglese?
+
+  - intent: ask_prices
+    examples: |
+      - quanto costa
+      - prezzi ripetizioni
+      - costo orario
+      - tariffe
+      - quanto costa un'ora
+      - prezzi per materia
+
+  - intent: ask_how_it_works
+    examples: |
+      - come funziona
+      - come prenoto
+      - come si fa
+      - spiegami come funziona
+      - procedura prenotazione
+
+  - intent: ask_availability
+    examples: |
+      - quando siete disponibili
+      - orari disponibili
+      - che giorni fate ripetizioni
+      - avete disponibilità questo weekend
