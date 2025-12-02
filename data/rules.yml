@@ -1,61 +1,36 @@
 version: "3.1"
 
 rules:
-  # Saluti base
-  - rule: Saluta quando utente saluta
+  - rule: Saluta
     steps:
       - intent: greet
       - action: utter_greet
 
-  - rule: Saluta quando utente va via
+  - rule: Arrivederci
     steps:
       - intent: goodbye
       - action: utter_goodbye
 
-  - rule: Rispondi a bot challenge
-    steps:
-      - intent: bot_challenge
-      - action: utter_iamabot
-
-  # FAQ - Risposte dirette
-  - rule: Info materie
-    steps:
-      - intent: ask_subjects
-      - action: utter_subjects_info
-
-  - rule: Info prezzi
-    steps:
-      - intent: ask_prices
-      - action: utter_prices_info
-
-  - rule: Come funziona
-    steps:
-      - intent: ask_how_it_works
-      - action: utter_how_it_works
-
-  # Form prenotazione ripetizioni
-  - rule: Attiva form prenotazione
+  - rule: Attiva prenotazione
     steps:
       - intent: book_tutoring
       - action: tutoring_booking_form
       - active_loop: tutoring_booking_form
 
-  - rule: Submit form prenotazione
+  # ✅ IMPORTANTE: Mostra slot DOPO che materia è validata
+  - rule: Mostra slot disponibili dopo materia
+    condition:
+      - active_loop: tutoring_booking_form
+    steps:
+      - slot_was_set:
+          - materia
+      - action: action_show_available_slots
+
+  # ✅ Conferma prenotazione quando form è completo
+  - rule: Conferma prenotazione
     condition:
       - active_loop: tutoring_booking_form
     steps:
       - action: tutoring_booking_form
       - active_loop: null
-      - action: action_assign_tutor
-      - action: utter_submit
-
-  # Interruzione form
-  - rule: Interrompi prenotazione se utente nega
-    condition:
-      - active_loop: tutoring_booking_form
-    steps:
-      - intent: deny
-      - action: action_deactivate_loop
-      - active_loop: null
-      - action: utter_goodbye
-
+      - action: action_confirm_booking

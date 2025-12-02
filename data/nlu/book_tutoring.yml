@@ -24,14 +24,14 @@ nlu:
       - fate ripetizioni di matematica?
       - avete tutor per inglese?
 
-  - intent: ask_prices
+  - intent: inform_slot
     examples: |
-      - quanto costa
-      - prezzi ripetizioni
-      - costo orario
-      - tariffe
-      - quanto costa un'ora
-      - prezzi per materia
+      - [2025-11-28_15](orario_inizio)
+      - [2025-11-29_16](orario_inizio)
+      - [2025-12-01_10](orario_inizio)
+      - dalle 16 alle 17
+      - alle 16
+      - la prima disponibile
 
   - intent: ask_how_it_works
     examples: |

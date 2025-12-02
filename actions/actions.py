@@ -5,11 +5,12 @@ from rasa_sdk.events import SlotSet
 from rasa_sdk.types import DomainDict
 import csv
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
+from rasa_sdk.events import SlotSet, FollowupAction
 
 
 class ValidateTutoringBookingForm(FormValidationAction):
-    """Valida i dati del form prenotazione ripetizioni"""
+    """Valida i dati inseriti dall'utente"""
     
     def name(self) -> Text:
         return "validate_tutoring_booking_form"
@@ -21,89 +22,58 @@ class ValidateTutoringBookingForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Valida la materia"""
-        materie_valide = [
-            "matematica", "fisica", "chimica", "inglese", 
-            "italiano", "latino", "greco", "informatica", "economia"
-        ]
+        """Valida materia e cerca tutor disponibili"""
+        materia = slot_value.lower().strip()
         
-        materia = slot_value.lower() if slot_value else None
-        
-        if materia in materie_valide:
-            return {"materia": materia}
-        else:
-            dispatcher.utter_message(
-                text=f"Mi dispiace, non offriamo ripetizioni di {slot_value}. "
-                     f"Le materie disponibili sono: {', '.join(materie_valide)}"
-            )
+        # Leggi CSV tutor
+        tutor_trovati = []
+        try:
+            with open('actions/csv/tutor.csv', 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    materie_tutor = [m.strip().lower() for m in row['materie'].split(';')]
+                    if materia in materie_tutor:
+                        tutor_trovati.append(row)
+        except FileNotFoundError:
+            dispatcher.utter_message(text="Errore nel caricamento dei dati.")
             return {"materia": None}
+        
+        if not tutor_trovati:
+            dispatcher.utter_message(text=f"Non abbiamo tutor disponibili per {materia}.")
+            return {"materia": None}
+        
+        # Prendi il primo tutor disponibile (o logica più complessa)
+        tutor = tutor_trovati[0]
+        
+        return {
+            "materia": materia,
+            "tutor_selezionato": f"{tutor['nome']} {tutor['cognome']}",
+            "tariffa": tutor['tariffa']
+        }
     
-    def validate_livello(
+    def validate_orario_inizio(
         self,
         slot_value: Any,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Valida il livello scolastico"""
-        livelli_validi = ["elementari", "medie", "superiori", "università", "universita"]
+        """Valida che lo slot scelto sia valido e calcola fine"""
+        # slot_value formato: "2025-11-28_15" (data_ora)
         
-        livello = slot_value.lower() if slot_value else None
-        
-        # Normalizza università/universita
-        if livello in ["università", "universita", "uni"]:
-            livello = "università"
-        
-        if livello in livelli_validi:
-            return {"livello": livello}
-        else:
-            dispatcher.utter_message(
-                text="Per favore specifica: elementari, medie, superiori o università"
-            )
-            return {"livello": None}
-    
-    def validate_modalita(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Valida la modalità (presenza/online)"""
-        modalita = slot_value.lower() if slot_value else None
-        
-        if "onl" in modalita or "remot" in modalita or "distanz" in modalita:
-            return {"modalita": "online"}
-        elif "pres" in modalita or "persona" in modalita or "casa" in modalita:
-            return {"modalita": "presenza"}
-        else:
-            dispatcher.utter_message(
-                text="Preferisci lezioni in presenza o online?"
-            )
-            return {"modalita": None}
-    
-    def validate_durata(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Valida la durata della lezione"""
-        durate_valide = ["1 ora", "1.5 ore", "2 ore"]
-        
-        # Estrai numero dalla stringa
-        if "1.5" in slot_value or "90" in slot_value:
-            return {"durata": "1.5 ore"}
-        elif "2" in slot_value or "due" in slot_value:
-            return {"durata": "2 ore"}
-        elif "1" in slot_value or "un" in slot_value:
-            return {"durata": "1 ora"}
-        else:
-            dispatcher.utter_message(
-                text="Scegli tra: 1 ora, 1.5 ore o 2 ore"
-            )
-            return {"durata": None}
+        try:
+            data_ora = slot_value.split('_')
+            data = data_ora[0]
+            ora = int(data_ora[1])
+            
+            return {
+                "orario_inizio": str(ora),
+                "orario_fine": str(ora + 1),
+                "data_lezione": data
+            }
+        except:
+            dispatcher.utter_message(text="Formato orario non valido.")
+            return {"orario_inizio": None}
     
     def validate_email_studente(
         self,
@@ -112,23 +82,21 @@ class ValidateTutoringBookingForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Valida l'email"""
+        """Valida email"""
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         
         if re.match(email_pattern, slot_value):
             return {"email_studente": slot_value}
         else:
-            dispatcher.utter_message(
-                text="Email non valida. Inserisci un'email corretta (es. nome@esempio.com)"
-            )
+            dispatcher.utter_message(text="Email non valida. Riprova:")
             return {"email_studente": None}
 
 
-class ActionAssignTutor(Action):
-    """Assegna un tutor disponibile in base a materia e livello"""
+class ActionShowAvailableSlots(Action):
+    """Mostra gli slot disponibili con buttons"""
     
     def name(self) -> Text:
-        return "action_assign_tutor"
+        return "action_show_available_slots"
     
     def run(
         self,
@@ -137,64 +105,119 @@ class ActionAssignTutor(Action):
         domain: Dict[Text, Any]
     ) -> List[Dict[Text, Any]]:
         
-        # Recupera slot
         materia = tracker.get_slot('materia')
-        livello = tracker.get_slot('livello')
-        modalita = tracker.get_slot('modalita')
+        tutor_selezionato = tracker.get_slot('tutor_selezionato')
         
-        # Cerca tutor nel CSV
-        tutor_assegnato = None
+        if not tutor_selezionato:
+            dispatcher.utter_message(text="Errore: nessun tutor selezionato.")
+            return []
+        
+        # Leggi dati tutor
+        tutor_data = None
         try:
             with open('actions/csv/tutor.csv', 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
-                
                 for row in reader:
-                    # Verifica materia
-                    materie_tutor = row['materie'].split(',')
-                    materie_tutor = [m.strip().lower() for m in materie_tutor]
-                    
-                    if materia not in materie_tutor:
-                        continue
-                    
-                    # Verifica livello
-                    if livello not in row['livello'].lower():
-                        continue
-                    
-                    # Verifica modalità
-                    if modalita not in row['modalita'].lower():
-                        continue
-                    
-                    # Tutor trovato!
-                    tutor_assegnato = f"{row['nome']} {row['cognome']}"
-                    tariffa = row['tariffa']
-                    break
-            
-            if tutor_assegnato:
-                dispatcher.utter_message(
-                    text=f"👨‍🏫 Ti ho assegnato il tutor: {tutor_assegnato}\n"
-                         f"💰 Tariffa: {tariffa}€/ora"
-                )
-            else:
-                dispatcher.utter_message(
-                    text="⚠️ Al momento non abbiamo tutor disponibili per questa combinazione. "
-                         "Ti contatteremo appena possibile!"
-                )
-                tutor_assegnato = "In attesa di assegnazione"
-        
+                    if f"{row['nome']} {row['cognome']}" == tutor_selezionato:
+                        tutor_data = row
+                        break
         except FileNotFoundError:
-            dispatcher.utter_message(
-                text="Errore nel sistema. Ti contatteremo via email!"
-            )
-            tutor_assegnato = "Sistema in manutenzione"
+            dispatcher.utter_message(text="Errore nel caricamento dati tutor.")
+            return []
         
-        return [SlotSet("tutor_assegnato", tutor_assegnato)]
+        if not tutor_data:
+            dispatcher.utter_message(text="Errore nel caricamento tutor.")
+            return []
+        
+        # Genera slot disponibili (prossimi 7 giorni)
+        slot_disponibili = self._genera_slot_disponibili(tutor_data)
+        
+        # Filtra slot già occupati
+        slot_liberi = self._filtra_slot_occupati(slot_disponibili, tutor_selezionato)
+        
+        if not slot_liberi:
+            dispatcher.utter_message(text="Nessuno slot disponibile nei prossimi 7 giorni.")
+            return []
+        
+        # Crea buttons (max 10 slot)
+        buttons = []
+        for slot in slot_liberi[:10]:
+            data, ora = slot.split('_')
+            # Formato leggibile: "Lun 28/11 ore 15:00"
+            dt = datetime.strptime(data, '%Y-%m-%d')
+            giorno_nome = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'][dt.weekday()]
+            label = f"{giorno_nome} {dt.strftime('%d/%m')} ore {ora}:00"
+            
+            buttons.append({
+                "title": label,
+                "payload": f"/inform_slot{{\"orario_inizio\": \"{slot}\"}}"
+            })
+        
+        dispatcher.utter_message(
+            text=f"🎓 Perfetto! Ho trovato {tutor_selezionato}\n💰 Tariffa: {tutor_data['tariffa']}€/ora\n\n📅 Scegli uno slot disponibile:",
+            buttons=buttons
+        )
+        
+        return [SlotSet("slot_disponibili", slot_liberi)]
+    
+    def _genera_slot_disponibili(self, tutor_data: Dict) -> List[str]:
+        """Genera tutti gli slot possibili per il tutor nei prossimi 7 giorni"""
+        slot_list = []
+        
+        giorni_settimana = {
+            'lunedi': 0, 'martedi': 1, 'mercoledi': 2, 
+            'giovedi': 3, 'venerdi': 4, 'sabato': 5, 'domenica': 6
+        }
+        
+        giorni_disponibili = [giorni_settimana[g.strip().lower()] 
+                             for g in tutor_data['disponibilita_giorni'].split(';')]
+        
+        ora_inizio = int(tutor_data['disponibilita_inizio'])
+        ora_fine = int(tutor_data['disponibilita_fine'])
+        
+        # Prossimi 7 giorni
+        oggi = datetime.now()
+        for i in range(7):
+            data = oggi + timedelta(days=i)
+            
+            # Salta se non è un giorno disponibile
+            if data.weekday() not in giorni_disponibili:
+                continue
+            
+            # Genera slot orari (ogni ora)
+            for ora in range(ora_inizio, ora_fine):
+                slot = f"{data.strftime('%Y-%m-%d')}_{ora}"
+                slot_list.append(slot)
+        
+        return slot_list
+    
+    def _filtra_slot_occupati(self, slot_list: List[str], tutor_nome: str) -> List[str]:
+        """Rimuove gli slot già prenotati"""
+        try:
+            with open('actions/csv/prenotazioni.csv', 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                prenotazioni = list(reader)
+        except FileNotFoundError:
+            # Se il file non esiste, tutti gli slot sono liberi
+            return slot_list
+        
+        slot_occupati = []
+        for p in prenotazioni:
+            if f"{p['tutor_nome']} {p['tutor_cognome']}" == tutor_nome:
+                slot_occupato = f"{p['data']}_{p['ora_inizio']}"
+                slot_occupati.append(slot_occupato)
+        
+        # Rimuovi slot occupati
+        slot_liberi = [s for s in slot_list if s not in slot_occupati]
+        
+        return slot_liberi
 
 
-class ActionShowBookingSummary(Action):
-    """Mostra riepilogo prenotazione"""
+class ActionConfirmBooking(Action):
+    """Salva prenotazione e mostra riepilogo"""
     
     def name(self) -> Text:
-        return "action_show_booking_summary"
+        return "action_confirm_booking"
     
     def run(
         self,
@@ -205,56 +228,46 @@ class ActionShowBookingSummary(Action):
         
         # Recupera tutti gli slot
         materia = tracker.get_slot('materia')
-        livello = tracker.get_slot('livello')
-        modalita = tracker.get_slot('modalita')
+        tutor_selezionato = tracker.get_slot('tutor_selezionato')
         data_lezione = tracker.get_slot('data_lezione')
-        orario_lezione = tracker.get_slot('orario_lezione')
-        durata = tracker.get_slot('durata')
-        nome_studente = tracker.get_slot('nome_studente')
-        email_studente = tracker.get_slot('email_studente')
-        tutor_assegnato = tracker.get_slot('tutor_assegnato')
+        orario_inizio = tracker.get_slot('orario_inizio')
+        orario_fine = tracker.get_slot('orario_fine')
+        email = tracker.get_slot('email_studente')
+        tariffa = tracker.get_slot('tariffa')
         
-        # Calcola prezzo
-        prezzo = self._calcola_prezzo(livello, durata)
+        # Salva prenotazione nel CSV
+        tutor_nome, tutor_cognome = tutor_selezionato.split(' ', 1)
         
-        # Crea messaggio riepilogo
-        summary = (
-            f"📋 **Riepilogo Prenotazione**\n\n"
-            f"👤 Studente: {nome_studente}\n"
-            f"📧 Email: {email_studente}\n"
+        try:
+            with open('actions/csv/prenotazioni.csv', 'a', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                # Se file vuoto, scrivi header
+                f.seek(0, 2)  # Va alla fine del file
+                if f.tell() == 0:
+                    writer.writerow(['tutor_nome', 'tutor_cognome', 'data', 'ora_inizio', 'ora_fine', 'materia', 'email_studente'])
+                
+                writer.writerow([tutor_nome, tutor_cognome, data_lezione, orario_inizio, orario_fine, materia, email])
+        except Exception as e:
+            dispatcher.utter_message(text=f"Errore nel salvare la prenotazione: {e}")
+            return []
+        
+        # Formatta data leggibile
+        dt = datetime.strptime(data_lezione, '%Y-%m-%d')
+        data_leggibile = dt.strftime('%d/%m/%Y')
+        giorno_nome = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'][dt.weekday()]
+        
+        # Mostra riepilogo
+        riepilogo = (
+            f"✅ **PRENOTAZIONE CONFERMATA**\n\n"
             f"📚 Materia: {materia.capitalize()}\n"
-            f"🎓 Livello: {livello.capitalize()}\n"
-            f"📍 Modalità: {modalita.capitalize()}\n"
-            f"📅 Data: {data_lezione}\n"
-            f"🕒 Orario: {orario_lezione}\n"
-            f"⏱️ Durata: {durata}\n"
-            f"👨‍🏫 Tutor: {tutor_assegnato}\n"
-            f"💰 Prezzo: {prezzo}€\n\n"
-            f"✅ Riceverai conferma via email!"
+            f"👨‍🏫 Tutor: {tutor_selezionato}\n"
+            f"📅 Data: {giorno_nome} {data_leggibile}\n"
+            f"🕒 Orario: {orario_inizio}:00 - {orario_fine}:00\n"
+            f"💰 Tariffa: {tariffa}€\n"
+            f"📧 Email: {email}\n\n"
+            f"Riceverai una conferma via email! 📨"
         )
         
-        dispatcher.utter_message(text=summary)
+        dispatcher.utter_message(text=riepilogo)
         
         return []
-    
-    def _calcola_prezzo(self, livello: str, durata: str) -> float:
-        """Calcola il prezzo in base a livello e durata"""
-        # Tariffe base per ora
-        tariffe = {
-            "elementari": 15,
-            "medie": 15,
-            "superiori": 20,
-            "università": 25
-        }
-        
-        tariffa_oraria = tariffe.get(livello, 20)
-        
-        # Estrai ore dalla durata
-        if "1.5" in durata:
-            ore = 1.5
-        elif "2" in durata:
-            ore = 2
-        else:
-            ore = 1
-        
-        return tariffa_oraria * ore

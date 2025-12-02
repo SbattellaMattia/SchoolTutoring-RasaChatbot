@@ -1,6 +1,15 @@
 version: "3.1"
 
 actions:
-  - action_assign_tutor
-  - action_show_booking_summary
+  # Responses (definite in responses.yml)
+  - utter_greet
+  - utter_goodbye
+  - utter_ask_materia
+  - utter_ask_email_studente
+  - utter_no_tutor_available
+  - utter_no_slots_available
+  
+  # Custom actions (implementate in actions/actions.py)
+  - action_show_available_slots
+  - action_confirm_booking
   - validate_tutoring_booking_form

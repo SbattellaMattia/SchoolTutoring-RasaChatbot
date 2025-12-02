@@ -1,29 +1,16 @@
 version: "3.1"
 
+# Le stories sono "scenari di esempio" 
+# che mostrano al bot come gestire conversazioni reali,
+# permettendogli di imparare pattern e comportarsi correttamente
+# anche in situazioni leggermente diverse da quelle viste durante il training.
+
 stories:
-- story: prenotazione ripetizioni completa
-  steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: book_tutoring
-  - action: tutoring_booking_form
-  - active_loop: tutoring_booking_form
- 
+  - story: prenotazione completa
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: book_tutoring
+      - action: tutoring_booking_form
+      - active_loop: tutoring_booking_form
 
-- story: chiede info poi prenota
-  steps:
-  - intent: ask_prices
-  - action: utter_prices_info
-  - intent: book_tutoring
-  - action: tutoring_booking_form
-  - active_loop: tutoring_booking_form
-
-
-- story: solo informazioni
-  steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: ask_subjects
-  - action: utter_subjects_info
-  - intent: goodbye
-  - action: utter_goodbye

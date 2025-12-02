@@ -8,6 +8,6 @@ intents:
   - bot_challenge
   - book_tutoring
   - ask_subjects
-  - ask_prices
+  - inform_slot
   - ask_how_it_works
   - ask_availability

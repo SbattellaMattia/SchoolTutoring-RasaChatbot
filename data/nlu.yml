@@ -1,6 +1,20 @@
 version: "3.1"
 
 nlu:
+
+  - intent: greet
+    examples: |
+      - ciao
+      - buongiorno
+      - salve
+      - hey
+
+  - intent: goodbye
+    examples: |
+      - arrivederci
+      - grazie ciao
+      - ci vediamo
+      
   - intent: affirm
     examples: |
       - sì

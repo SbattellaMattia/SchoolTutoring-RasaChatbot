@@ -9,63 +9,29 @@ slots:
         conditions:
           - active_loop: tutoring_booking_form
             requested_slot: materia
-    
-  livello:
-    type: categorical
-    values: [elementari, medie, superiori, università]
-    influence_conversation: true
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: tutoring_booking_form
-            requested_slot: livello
   
-  modalita:
-    type: categorical
-    values: [presenza, online]
-    influence_conversation: true
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: tutoring_booking_form
-            requested_slot: modalita
+  tutor_selezionato:
+    type: text
+    influence_conversation: false
+    mappings: []  # Riempito da custom action
   
   data_lezione:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: tutoring_booking_form
-            requested_slot: data_lezione
+    mappings: []  # Calcolata automaticamente dalla scelta slot
   
-  orario_lezione:
+  orario_inizio:
     type: text
     influence_conversation: false
     mappings:
-      - type: from_text
-        conditions:
-          - active_loop: tutoring_booking_form
-            requested_slot: orario_lezione
+      - type: from_entity
+        entity: orario_inizio
+        intent: inform_slot
   
-  durata:
-    type: categorical
-    values: ["1 ora", "1.5 ore", "2 ore"]
-    influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: tutoring_booking_form
-            requested_slot: durata
-  
-  nome_studente:
+  orario_fine:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: tutoring_booking_form
-            requested_slot: nome_studente
+    mappings: []  # Calcolato automaticamente (inizio + 1 ora)
   
   email_studente:
     type: text
@@ -76,7 +42,12 @@ slots:
           - active_loop: tutoring_booking_form
             requested_slot: email_studente
   
-  tutor_assegnato:
+  tariffa:
     type: text
     influence_conversation: false
-    mappings: []
+    mappings: []  # Riempito da custom action
+  
+  slot_disponibili:
+    type: list
+    influence_conversation: false
+    mappings: []  # Lista slot liberi (usato internamente)
