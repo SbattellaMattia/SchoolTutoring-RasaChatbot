@@ -8,7 +8,7 @@ python -m pip perchè altrimenti mi prendeva il pip globale anche nel venv.
 
 Avvio dell'addestramento:
 ```
-rasa train --domains domain
+rasa train --domain domains
 ``` 
 Per avviare da linea di comando e testare:
 ```
@@ -16,7 +16,7 @@ rasa shell
 ``` 
 In un altro terminale attivare: 
 ```
-rasa run action
+rasa run actions
 ``` 
 per le action personalizzate (action_...) oltre quelle normali (utter_...).
 
