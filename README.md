@@ -1,6 +1,11 @@
 # School Tutoring - Rasa Chatbot
 Bot Telegram per prenotare ripetizioni scolastiche.
 
+<div align="center">
+  <img width="300" height="429" src="https://github.com/user-attachments/assets/a07803ea-ec27-4990-adf8-b3bcb3e0904e" />
+</div>
+
+
 ## Prerequisiti
 - Docker e Docker Compose
 - ngrok (per esporre il bot su internet)
