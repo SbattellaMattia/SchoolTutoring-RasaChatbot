@@ -50,3 +50,16 @@ responses:
 
   utter_restart:
     - text: "♻️ Ok, ricomincio da capo! Come posso aiutarti?"
+
+  utter_help:
+    - text: "❓ **Come funziona il bot**
+        
+        Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:
+        
+        📚 **Cerca tutor** - Ti aiuto a trovare tutor disponibili per la materia che ti serve
+        📅 **Prenota lezioni** - Prenoto le tue lezioni con il tutor scelto
+        👤 **Visualizza prenotazioni** - Mostro le tue lezioni prenotate
+        
+        🚀 Per iniziare, dimmi per quale materia cerchi un tutor!
+        
+        Per vedere i comandi principali clicca sul menù in basso a sinisstra. Buono studio!"

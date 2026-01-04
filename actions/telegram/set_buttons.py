@@ -12,8 +12,8 @@ commands = [
     {"command": "materie", "description": "📚 Vedi le materie disponibili"},
     {"command": "tutor", "description": "👨‍🏫 Cerca un tutor"},
     {"command": "lezioni", "description": "📖 Le mie lezioni prenotate"},
-    {"command": "ricomincia", "description": "🔄 Nuova conversazione"},
-    {"command": "aiuto", "description": "❓ Come funziona il bot"}
+    {"command": "restart", "description": "🔄 Nuova conversazione"},
+    {"command": "help", "description": "❓ Come funziona il bot"}
 ]
 
 # Set the commands via Telegram API
