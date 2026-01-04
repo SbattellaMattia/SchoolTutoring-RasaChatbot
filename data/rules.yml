@@ -21,3 +21,8 @@ rules:
   steps:
   - intent: thankyou
   - action: utter_thankyou
+
+- rule: Restart conversation
+  steps:
+    - intent: ricomincia
+    - action: action_restart

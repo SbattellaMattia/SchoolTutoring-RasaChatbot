@@ -65,7 +65,7 @@ class ActionSearchTutors(Action):
             # Per ora mostriamo tutti i tutor della materia
 
             # Prepara il messaggio con i tutor trovati
-            message = f"Ho trovato questi tutor disponibili per {materia}:\nQuale preferisci?\n\n"
+            message = f"Ho trovato questi tutor disponibili per {materia}. Quale preferisci?\n\n"
 
             buttons = []
             tutors_list = []
@@ -91,7 +91,7 @@ class ActionSearchTutors(Action):
             # Invia messaggio con bottoni
             dispatcher.utter_message(
                 text=message,
-                buttons=buttons
+                buttons=buttons,                button_type="vertical"
             )
 
             return [

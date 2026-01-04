@@ -47,3 +47,6 @@ responses:
 
   utter_iamabot:
     - text: "Sono un assistente virtuale per prenotare ripetizioni."
+
+  utter_restart:
+    - text: "♻️ Ok, ricomincio da capo! Come posso aiutarti?"

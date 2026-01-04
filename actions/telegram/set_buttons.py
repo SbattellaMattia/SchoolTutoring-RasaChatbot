@@ -3,15 +3,17 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-BOT_TOKEN = os.getenv("TELEGRAM_TOKEN")
+BOT_TOKEN = os.getenv("TELEGRAM_ACCESS_TOKEN")
 
 # Define the commands
 commands = [
-    {"command": "start", "description": "🚩 Avvia la sessione"},
-    {"command": "info", "description": "ℹ️ Come posso prenotare?"},
-    {"command": "bot_challenge", "description": "🤖 Sto parlando con un bot?"},
-    {"command": "security", "description": ""},
-    {"command": "ricomincia", "description": "👉🏼 Comincia una nuova sessione"},
+    {"command": "start", "description": "🚀 Avvia il bot tutoring"},
+    {"command": "prenota", "description": "📅 Prenota una lezione"},
+    {"command": "materie", "description": "📚 Vedi le materie disponibili"},
+    {"command": "tutor", "description": "👨‍🏫 Cerca un tutor"},
+    {"command": "lezioni", "description": "📖 Le mie lezioni prenotate"},
+    {"command": "ricomincia", "description": "🔄 Nuova conversazione"},
+    {"command": "aiuto", "description": "❓ Come funziona il bot"}
 ]
 
 # Set the commands via Telegram API
