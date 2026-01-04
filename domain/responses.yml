@@ -1,0 +1,49 @@
+version: "3.1"
+
+responses:
+  utter_greet:
+    - text: "Ciao! Sono l'assistente per le ripetizioni. Come posso aiutarti?"
+    - text: "Buongiorno! Sono qui per aiutarti a trovare un tutor. Di cosa hai bisogno?"
+
+  utter_ask_materia:
+    - text: "In quale materia hai bisogno di ripetizioni?"
+    - text: "Per quale materia cerchi un tutor?"
+    - text: "Quale materia ti interessa? Al momento offriamo matematica, italiano e chimica."
+
+  utter_ask_data:
+    - text: "Per quale data vorresti la ripetizione? (es. domani, lunedì, 10 gennaio)"
+    - text: "Quale giorno preferisci?"
+
+  utter_ask_ora:
+    - text: "A che ora ti farebbe comodo? (es. 15:00, 16:30)"
+    - text: "Quale orario preferisci?"
+
+  utter_ask_tutor_scelto:
+    - text: "Quale tutor preferisci? Puoi indicare il nome o dire 'il primo' / 'il secondo'."
+
+  utter_no_tutors_found:
+    - text: "Mi dispiace, non ci sono tutor disponibili per {materia} il {data} alle {ora}."
+    - text: "Purtroppo non ho trovato tutor disponibili in quella fascia oraria per {materia}."
+
+  utter_ask_retry:
+    - text: "Vuoi provare con un'altra data o orario?"
+    - text: "Posso cercare con una disponibilità diversa?"
+
+  utter_confirm_booking:
+    - text: "Perfetto! Ho prenotato la ripetizione di {materia} con {tutor_scelto} per il {data} alle {ora}."
+    - text: "Prenotazione confermata! Ti aspetta {tutor_scelto} per {materia} il {data} alle {ora}."
+
+  utter_goodbye:
+    - text: "Arrivederci! Buono studio!"
+    - text: "A presto! Se hai bisogno, sono sempre qui."
+
+  utter_thankyou:
+    - text: "Prego, è stato un piacere aiutarti!"
+    - text: "Figurati! Buone ripetizioni!"
+
+  utter_default:
+    - text: "Scusa, non ho capito. Puoi riformulare?"
+    - text: "Mi dispiace, non ho compreso. Puoi ripetere in altro modo?"
+
+  utter_iamabot:
+    - text: "Sono un assistente virtuale per prenotare ripetizioni."

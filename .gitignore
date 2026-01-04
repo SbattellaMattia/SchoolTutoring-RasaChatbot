@@ -1,6 +1,9 @@
 # Ignore Python virtual environment
 rasa_env/
 venv
+.venv
+.keras/
+.config/
 
 # Ignore Rasa specific files
 .rasa/

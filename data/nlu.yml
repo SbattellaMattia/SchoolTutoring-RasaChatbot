@@ -1,60 +1,141 @@
 version: "3.1"
 
 nlu:
+- intent: greet
+  examples: |
+    - ciao
+    - buongiorno
+    - buonasera
+    - salve
+    - hey
+    - ehi
+    - salut
+    - ciao ciao
+    - buondì
+    - ehilà
+    - bella
+    - presente
+    - hola
+    - hi
+    - hello
 
-  - intent: greet
-    examples: |
-      - ciao
-      - buongiorno
-      - salve
-      - hey
+- intent: request_tutoring
+  examples: |
+    - vorrei delle ripetizioni
+    - ho bisogno di ripetizioni
+    - cerco un tutor
+    - mi servono delle lezioni
+    - avrei bisogno di aiuto per studiare
+    - ho bisogno di aiuto
+    - cerco ripetizioni
+    - vorrei prenotare una lezione
+    - mi servirebbero delle ripetizioni
+    - devo trovare un insegnante
+    - mi servirebbe un aiuto per lo studio
+    - sto cercando qualcuno che mi aiuti
+    - posso prenotare una ripetizione?
+    - voglio prenotare una lezione
+    - come faccio a prenotare?
 
-  - intent: goodbye
-    examples: |
-      - arrivederci
-      - grazie ciao
-      - ci vediamo
-      
-  - intent: affirm
-    examples: |
-      - sì
-      - s
-      - /affirm
-      - proprio così
-      - naturalmente
-      - suona bene
-      - corretto
-      - /affermare
+- intent: inform
+  examples: |
+    - [matematica](materia)
+    - ho bisogno di [matematica](materia)
+    - vorrei [italiano](materia)
+    - mi serve [chimica](materia)
+    - per [matematica](materia)
+    - [chimica](materia) per favore
+    - la materia è [italiano](materia)
+    - [domani](data) alle [15:00](ora)
+    - per [lunedì](data) alle [16:00](ora)
+    - il [10 gennaio](data) alle [14:30](ora)
+    - [martedì](data) alle [17:00](ora)
+    - alle [15:00](ora)
+    - [domani](data)
+    - per [oggi](data)
+    - il [5 gennaio](data)
+    - [mercoledì](data) pomeriggio
+    - verso le [16:00](ora)
+    - alle [quattro](ora)
+    - alle [15](ora)
+    - intorno alle [14:00](ora)
 
-  - intent: deny
-    examples: |
-      - no
-      - n
-      - mai
-      - non credo
-      - non mi piace
-      - assolutamente no
-      - /deny
-      - non proprio
+- intent: affirm
+  examples: |
+    - sì
+    - si
+    - yes
+    - certo
+    - va bene
+    - ok
+    - okay
+    - perfetto
+    - certamente
+    - assolutamente
+    - confermo
+    - esatto
+    - giusto
+    - d'accordo
+    - va benissimo
 
-  - intent: stop
-    examples: |
-      - stop
-      - basta
-      - non voglio continuare
-      - non voglio continuare a parlare
-      - non voglio continuare la conversazione
-      - non voglio continuare a parlare con te
-      - non voglio parlare con te
-      - grazie, ma ho finito adesso
+- intent: deny
+  examples: |
+    - no
+    - no grazie
+    - non mi interessa
+    - voglio cambiare
+    - vorrei un altro orario
+    - preferisco un'altra data
+    - no non va bene
+    - non posso
+    - non mi va bene
+    - preferirei altro
+    - no grazie voglio riprovare
+    - cambiamo
+    - riprovo
 
+- intent: choose_tutor
+  examples: |
+    - [Mario Rossi](tutor_name)
+    - vorrei [Laura Bianchi](tutor_name)
+    - scelgo [Giuseppe Verdi](tutor_name)
+    - il primo
+    - il secondo
+    - il terzo
+    - il più economico
+    - quello che costa meno
+    - il meno caro
+    - quello più disponibile
+    - prendo [Mario](tutor_name)
+    - va bene [Laura](tutor_name)
+    - prenoto con [Giuseppe](tutor_name)
 
-  - intent: next_action
-    examples: |
-      - cosa posso fare ora?
-      - quali sono le opzioni disponibili?
-      - cosa posso fare adesso?
-      - quali sono le altre opzioni?
-      - cosa posso fare dopo?
-      - adesso cosa posso fare?
-      - quindi, cosa posso fare?
+- intent: goodbye
+  examples: |
+    - arrivederci
+    - ciao
+    - bye
+    - a presto
+    - ci vediamo
+    - addio
+    - buona giornata
+    - buona serata
+    - alla prossima
+    - a dopo
+    - saluti
+    - ci sentiamo
+    - grazie e arrivederci
+
+- intent: thankyou
+  examples: |
+    - grazie
+    - grazie mille
+    - ti ringrazio
+    - grazie tante
+    - thank you
+    - thanks
+    - grazie per l'aiuto
+    - grazie di tutto
+    - ottimo grazie
+    - perfetto grazie
+    - apprezzo molto

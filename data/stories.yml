@@ -6,11 +6,83 @@ version: "3.1"
 # anche in situazioni leggermente diverse da quelle viste durante il training.
 
 stories:
-  - story: prenotazione completa
-    steps:
-      - intent: greet
-      - action: utter_greet
-      - intent: book_tutoring
-      - action: tutoring_booking_form
-      - active_loop: tutoring_booking_form
+- story: Prenotazione ripetizione con successo
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: request_tutoring
+  - action: tutoring_form
+  - active_loop: tutoring_form
+  - slot_was_set:
+    - requested_slot: materia
+  - slot_was_set:
+    - materia: matematica
+  - slot_was_set:
+    - requested_slot: data
+  - slot_was_set:
+    - data: domani
+  - slot_was_set:
+    - requested_slot: ora
+  - slot_was_set:
+    - ora: 15:00
+  - slot_was_set:
+    - requested_slot: null
+  - active_loop: null
+  - action: action_search_tutors
+  - slot_was_set:
+    - available_tutors: true
+  - intent: choose_tutor
+  - action: utter_confirm_booking
+  - action: action_save_booking
+  - intent: thankyou
+  - action: utter_thankyou
+
+- story: Nessun tutor disponibile - riprova
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: request_tutoring
+  - action: tutoring_form
+  - active_loop: tutoring_form
+  - active_loop: null
+  - action: action_search_tutors
+  - slot_was_set:
+    - available_tutors: false
+  - action: utter_no_tutors_found
+  - action: utter_ask_retry
+  - intent: affirm
+  - action: action_reset_slots
+  - action: tutoring_form
+  - active_loop: tutoring_form
+
+- story: Nessun tutor disponibile - abbandono
+  steps:
+  - intent: request_tutoring
+  - action: tutoring_form
+  - active_loop: tutoring_form
+  - active_loop: null
+  - action: action_search_tutors
+  - slot_was_set:
+    - available_tutors: false
+  - action: utter_no_tutors_found
+  - action: utter_ask_retry
+  - intent: deny
+  - action: utter_goodbye
+
+- story: Conversazione completa
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: request_tutoring
+  - action: tutoring_form
+  - active_loop: tutoring_form
+  - active_loop: null
+  - action: action_search_tutors
+  - slot_was_set:
+    - available_tutors: true
+  - intent: choose_tutor
+  - action: utter_confirm_booking
+  - intent: goodbye
+  - action: utter_goodbye
+
 

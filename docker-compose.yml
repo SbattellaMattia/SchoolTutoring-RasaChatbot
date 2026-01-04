@@ -1,0 +1,61 @@
+services:
+  # Duckling per estrarre date e orari
+  duckling:
+    image: rasa/duckling:latest
+    container_name: duckling
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - rasa-network
+
+  # Rasa Action Server
+  action-server:
+    build:
+      context: ./actions
+      dockerfile: Dockerfile
+    container_name: action-server
+    volumes:
+      - ./actions:/app/actions
+    ports:
+      - "5055:5055"
+    restart: unless-stopped
+    networks:
+      - rasa-network
+    command:
+      - start
+      - --actions
+      - actions
+
+  # Rasa Server
+  rasa:
+    image: rasa/rasa:3.6.0-full
+    container_name: rasa
+    volumes:
+      - ./:/app
+    ports:
+      - "5005:5005"
+    depends_on:
+      - action-server
+      - duckling
+    restart: unless-stopped
+    networks:
+      - rasa-network
+    env_file:
+    - .env
+    environment:
+      - TELEGRAM_ACCESS_TOKEN=${TELEGRAM_ACCESS_TOKEN}
+      - TELEGRAM_VERIFY=${TELEGRAM_VERIFY}
+      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL}
+    command: >
+      run
+      --enable-api
+      --cors "*"
+      --debug
+      --endpoints endpoints.yml
+      --credentials credentials.yml
+      --model models
+
+networks:
+  rasa-network:
+    driver: bridge

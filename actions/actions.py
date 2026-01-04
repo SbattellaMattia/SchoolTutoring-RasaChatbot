@@ -1,20 +1,143 @@
+# actions.py
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
-from rasa_sdk.events import SlotSet
+from rasa_sdk.events import SlotSet, AllSlotsReset
 from rasa_sdk.types import DomainDict
-import csv
-import re
+import pandas as pd
 from datetime import datetime, timedelta
-from rasa_sdk.events import SlotSet, FollowupAction
+import os
 
 
-class ValidateTutoringBookingForm(FormValidationAction):
-    """Valida i dati inseriti dall'utente"""
-    
+class ActionSearchTutors(Action):
+    """Action per cercare tutor disponibili nel database CSV"""
+
     def name(self) -> Text:
-        return "validate_tutoring_booking_form"
+        return "action_search_tutors"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        # Recupera gli slot
+        materia = tracker.get_slot("materia")
+        data = tracker.get_slot("data")
+        ora = tracker.get_slot("ora")
     
+        # Ottieni la directory dove si trova actions.py
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Vai alla cartella parent (la root del progetto)
+        project_root = os.path.dirname(current_dir)
+        
+        # Costruisci il path al CSV
+        csv_path = os.path.join(project_root, "actions", "csv", "tutor.csv")
+        
+        # DEBUG
+        print(f"🔍 Cercando CSV in: {csv_path}")
+        print(f"📁 File esiste? {os.path.exists(csv_path)}")
+
+        if not os.path.exists(csv_path):
+            dispatcher.utter_message(text="Errore: database tutor non trovato.")
+            return [SlotSet("available_tutors", False)]
+
+        try:
+            # Carica il database
+            df = pd.read_csv(csv_path)
+
+            # Filtra per materia
+            tutors = df[df['materia'].str.lower() == materia.lower()]
+
+            if tutors.empty:
+                dispatcher.utter_message(
+                    text=f"Mi dispiace, non ci sono tutor disponibili per {materia}."
+                )
+                return [
+                    SlotSet("available_tutors", False),     
+                    SlotSet("tutors_list", None)         
+                ]
+
+            # TODO: Qui dovresti implementare logica più sofisticata per 
+            # verificare disponibilità in base a data/ora
+            # Per ora mostriamo tutti i tutor della materia
+
+            # Prepara il messaggio con i tutor trovati
+            message = f"Ho trovato questi tutor disponibili per {materia}:\nQuale preferisci?\n\n"
+
+            buttons = []
+            tutors_list = []
+            
+            for idx, tutor in tutors.iterrows():
+                nome_completo = f"{tutor['nome']} {tutor['cognome']}"
+                costo = tutor['costo_ora']
+                
+                tutors_list.append({
+                    'nome': nome_completo,
+                    'costo': costo
+                })
+                
+                # Crea bottone per ogni tutor
+                button_title = f"👤 {nome_completo} - {costo}€/ora"
+                button_payload = f"/choose_tutor{{\"tutor_name\":\"{nome_completo}\"}}"
+                
+                buttons.append({
+                    "title": button_title,
+                    "payload": button_payload
+                })
+            
+            # Invia messaggio con bottoni
+            dispatcher.utter_message(
+                text=message,
+                buttons=buttons
+            )
+
+            return [
+                SlotSet("available_tutors", True),      # ← Per il flusso conversazionale
+                SlotSet("tutors_list", tutors_list)     # ← Per memorizzare i dati
+            ]
+
+        except Exception as e:
+            dispatcher.utter_message(
+                text=f"Si è verificato un errore durante la ricerca: {str(e)}"
+            )
+            return [
+                SlotSet("available_tutors", False),
+                SlotSet("tutors_list", None)
+            ]
+
+
+class ActionResetSlots(Action):
+    """Action per resettare gli slot e ricominciare"""
+
+    def name(self) -> Text:
+        return "action_reset_slots"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        return [
+            SlotSet("materia", None),
+            SlotSet("data", None),
+            SlotSet("ora", None),
+            SlotSet("available_tutors", None),
+            SlotSet("tutors_list", None),
+            SlotSet("tutor_scelto", None),
+        ]
+
+
+class ValidateTutoringForm(FormValidationAction):
+    """Validazione custom per il form di prenotazione"""
+
+    def name(self) -> Text:
+        return "validate_tutoring_form"
+
     def validate_materia(
         self,
         slot_value: Any,
@@ -22,252 +145,173 @@ class ValidateTutoringBookingForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Valida materia e cerca tutor disponibili"""
-        materia = slot_value.lower().strip()
-        
-        # Leggi CSV tutor
-        tutor_trovati = []
-        try:
-            with open('actions/csv/tutor.csv', 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    materie_tutor = [m.strip().lower() for m in row['materie'].split(';')]
-                    if materia in materie_tutor:
-                        tutor_trovati.append(row)
-        except FileNotFoundError:
-            dispatcher.utter_message(text="Errore nel caricamento dei dati.")
-            return {"materia": None}
-        
-        if not tutor_trovati:
-            dispatcher.utter_message(text=f"Non abbiamo tutor disponibili per {materia}.")
-            return {"materia": None}
-        
-        # Prendi il primo tutor disponibile (o logica più complessa)
-        tutor = tutor_trovati[0]
-        
-        return {
-            "materia": materia,
-            "tutor_selezionato": f"{tutor['nome']} {tutor['cognome']}",
-            "tariffa": tutor['tariffa']
-        }
-    
-    def validate_orario_inizio(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Valida che lo slot scelto sia valido e calcola fine"""
-        # slot_value formato: "2025-11-28_15" (data_ora)
-        
-        try:
-            data_ora = slot_value.split('_')
-            data = data_ora[0]
-            ora = int(data_ora[1])
-            
-            return {
-                "orario_inizio": str(ora),
-                "orario_fine": str(ora + 1),
-                "data_lezione": data
-            }
-        except:
-            dispatcher.utter_message(text="Formato orario non valido.")
-            return {"orario_inizio": None}
-    
-    def validate_email_studente(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Valida email"""
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        
-        if re.match(email_pattern, slot_value):
-            return {"email_studente": slot_value}
+        """Valida che la materia sia tra quelle disponibili"""
+
+        materie_valide = ["matematica", "italiano", "chimica"]
+
+        if slot_value and slot_value.lower() in materie_valide:
+            return {"materia": slot_value.lower()}
         else:
-            dispatcher.utter_message(text="Email non valida. Riprova:")
-            return {"email_studente": None}
+            dispatcher.utter_message(
+                text=f"Mi dispiace, al momento offriamo solo ripetizioni di matematica, italiano e chimica."
+            )
+            return {"materia": None}
 
-
-class ActionShowAvailableSlots(Action):
-    """Mostra gli slot disponibili con buttons"""
-    
-    def name(self) -> Text:
-        return "action_show_available_slots"
-    
-    def run(
+    def validate_data(
         self,
+        slot_value: Any,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
-        domain: Dict[Text, Any]
-    ) -> List[Dict[Text, Any]]:
-        
-        materia = tracker.get_slot('materia')
-        tutor_selezionato = tracker.get_slot('tutor_selezionato')
-        
-        if not tutor_selezionato:
-            dispatcher.utter_message(text="Errore: nessun tutor selezionato.")
-            return []
-        
-        # Leggi dati tutor
-        tutor_data = None
-        try:
-            with open('actions/csv/tutor.csv', 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if f"{row['nome']} {row['cognome']}" == tutor_selezionato:
-                        tutor_data = row
-                        break
-        except FileNotFoundError:
-            dispatcher.utter_message(text="Errore nel caricamento dati tutor.")
-            return []
-        
-        if not tutor_data:
-            dispatcher.utter_message(text="Errore nel caricamento tutor.")
-            return []
-        
-        # Genera slot disponibili (prossimi 7 giorni)
-        slot_disponibili = self._genera_slot_disponibili(tutor_data)
-        
-        # Filtra slot già occupati
-        slot_liberi = self._filtra_slot_occupati(slot_disponibili, tutor_selezionato)
-        
-        if not slot_liberi:
-            dispatcher.utter_message(text="Nessuno slot disponibile nei prossimi 7 giorni.")
-            return []
-        
-        # Crea buttons (max 10 slot)
-        buttons = []
-        for slot in slot_liberi[:10]:
-            data, ora = slot.split('_')
-            # Formato leggibile: "Lun 28/11 ore 15:00"
-            dt = datetime.strptime(data, '%Y-%m-%d')
-            giorno_nome = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'][dt.weekday()]
-            label = f"{giorno_nome} {dt.strftime('%d/%m')} ore {ora}:00"
-            
-            buttons.append({
-                "title": label,
-                "payload": f"/inform_slot{{\"orario_inizio\": \"{slot}\"}}"
-            })
-        
-        dispatcher.utter_message(
-            text=f"🎓 Perfetto! Ho trovato {tutor_selezionato}\n💰 Tariffa: {tutor_data['tariffa']}€/ora\n\n📅 Scegli uno slot disponibile:",
-            buttons=buttons
-        )
-        
-        return [SlotSet("slot_disponibili", slot_liberi)]
-    
-    def _genera_slot_disponibili(self, tutor_data: Dict) -> List[str]:
-        """Genera tutti gli slot possibili per il tutor nei prossimi 7 giorni"""
-        slot_list = []
-        
-        giorni_settimana = {
-            'lunedi': 0, 'martedi': 1, 'mercoledi': 2, 
-            'giovedi': 3, 'venerdi': 4, 'sabato': 5, 'domenica': 6
-        }
-        
-        giorni_disponibili = [giorni_settimana[g.strip().lower()] 
-                             for g in tutor_data['disponibilita_giorni'].split(';')]
-        
-        ora_inizio = int(tutor_data['disponibilita_inizio'])
-        ora_fine = int(tutor_data['disponibilita_fine'])
-        
-        # Prossimi 7 giorni
-        oggi = datetime.now()
-        for i in range(7):
-            data = oggi + timedelta(days=i)
-            
-            # Salta se non è un giorno disponibile
-            if data.weekday() not in giorni_disponibili:
-                continue
-            
-            # Genera slot orari (ogni ora)
-            for ora in range(ora_inizio, ora_fine):
-                slot = f"{data.strftime('%Y-%m-%d')}_{ora}"
-                slot_list.append(slot)
-        
-        return slot_list
-    
-    def _filtra_slot_occupati(self, slot_list: List[str], tutor_nome: str) -> List[str]:
-        """Rimuove gli slot già prenotati"""
-        try:
-            with open('actions/csv/prenotazioni.csv', 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                prenotazioni = list(reader)
-        except FileNotFoundError:
-            # Se il file non esiste, tutti gli slot sono liberi
-            return slot_list
-        
-        slot_occupati = []
-        for p in prenotazioni:
-            if f"{p['tutor_nome']} {p['tutor_cognome']}" == tutor_nome:
-                slot_occupato = f"{p['data']}_{p['ora_inizio']}"
-                slot_occupati.append(slot_occupato)
-        
-        # Rimuovi slot occupati
-        slot_liberi = [s for s in slot_list if s not in slot_occupati]
-        
-        return slot_liberi
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Valida la data inserita"""
 
+        # Qui potresti aggiungere logica per parsare e validare la data
+        # Per ora accettiamo qualsiasi valore
+        if slot_value:
+            return {"data": slot_value}
+        else:
+            return {"data": None}
+
+    def validate_ora(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Valida l'ora inserita"""
+
+        # Qui potresti aggiungere logica per validare il formato dell'ora
+        # Per ora accettiamo qualsiasi valore
+        if slot_value:
+            return {"ora": slot_value}
+        else:
+            return {"ora": None}
 
 class ActionConfirmBooking(Action):
-    """Salva prenotazione e mostra riepilogo"""
-    
+    """Action per confermare la prenotazione"""
+
     def name(self) -> Text:
         return "action_confirm_booking"
-    
+
     def run(
         self,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
-        domain: Dict[Text, Any]
+        domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
         
-        # Recupera tutti gli slot
-        materia = tracker.get_slot('materia')
-        tutor_selezionato = tracker.get_slot('tutor_selezionato')
-        data_lezione = tracker.get_slot('data_lezione')
-        orario_inizio = tracker.get_slot('orario_inizio')
-        orario_fine = tracker.get_slot('orario_fine')
-        email = tracker.get_slot('email_studente')
-        tariffa = tracker.get_slot('tariffa')
+        # Recupera gli slot
+        materia = tracker.get_slot("materia")
+        data = tracker.get_slot("data")
+        ora = tracker.get_slot("ora")
+        tutors_list = tracker.get_slot("tutors_list")
         
-        # Salva prenotazione nel CSV
-        tutor_nome, tutor_cognome = tutor_selezionato.split(' ', 1)
+        # Gestisci la scelta del tutor
+        last_message = tracker.latest_message.get('text', '').lower()
         
-        try:
-            with open('actions/csv/prenotazioni.csv', 'a', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                # Se file vuoto, scrivi header
-                f.seek(0, 2)  # Va alla fine del file
-                if f.tell() == 0:
-                    writer.writerow(['tutor_nome', 'tutor_cognome', 'data', 'ora_inizio', 'ora_fine', 'materia', 'email_studente'])
+        tutor_scelto = None
+        
+        if tutors_list:
+            if "primo" in last_message or "1" in last_message:
+                tutor_scelto = tutors_list[0]['nome']
+            elif "secondo" in last_message or "2" in last_message:
+                tutor_scelto = tutors_list[1]['nome'] if len(tutors_list) > 1 else tutors_list[0]['nome']
+            elif "terzo" in last_message or "3" in last_message:
+                tutor_scelto = tutors_list[2]['nome'] if len(tutors_list) > 2 else tutors_list[0]['nome']
+            else:
+                # Cerca il nome del tutor nel messaggio
+                for tutor in tutors_list:
+                    if tutor['nome'].lower() in last_message:
+                        tutor_scelto = tutor['nome']
+                        break
                 
-                writer.writerow([tutor_nome, tutor_cognome, data_lezione, orario_inizio, orario_fine, materia, email])
-        except Exception as e:
-            dispatcher.utter_message(text=f"Errore nel salvare la prenotazione: {e}")
+                # Se non trovato, prendi il primo
+                if not tutor_scelto:
+                    tutor_scelto = tutors_list[0]['nome']
+        
+        # Messaggio di conferma
+        message = f"Perfetto! Ho prenotato la ripetizione di {materia} con {tutor_scelto} per il {data} alle {ora}."
+        
+        dispatcher.utter_message(text=message)
+        
+        return [SlotSet("tutor_scelto", tutor_scelto)]
+    
+
+class ActionConfirmTutor(Action):
+    """Gestisce la scelta del tutor e salva la prenotazione"""
+
+    def name(self) -> Text:
+        return "action_confirm_tutor"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        
+        # Estrai il nome del tutor dall'entity
+        tutor_name = next(tracker.get_latest_entity_values("tutor_name"), None)
+        
+        if tutor_name:
+            # Salva la prenotazione
+            return [SlotSet("tutor_scelto", tutor_name)]
+        else:
+            dispatcher.utter_message(
+                text="Non ho capito quale tutor hai scelto. Riprova."
+            )
             return []
         
-        # Formatta data leggibile
-        dt = datetime.strptime(data_lezione, '%Y-%m-%d')
-        data_leggibile = dt.strftime('%d/%m/%Y')
-        giorno_nome = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'][dt.weekday()]
+
+class ActionSaveBooking(Action):
+    """Salva la prenotazione nel file bookings.csv"""
+
+    def name(self) -> Text:
+        return "action_save_booking"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
         
-        # Mostra riepilogo
-        riepilogo = (
-            f"✅ **PRENOTAZIONE CONFERMATA**\n\n"
-            f"📚 Materia: {materia.capitalize()}\n"
-            f"👨‍🏫 Tutor: {tutor_selezionato}\n"
-            f"📅 Data: {giorno_nome} {data_leggibile}\n"
-            f"🕒 Orario: {orario_inizio}:00 - {orario_fine}:00\n"
-            f"💰 Tariffa: {tariffa}€\n"
-            f"📧 Email: {email}\n\n"
-            f"Riceverai una conferma via email! 📨"
-        )
+        # Recupera i dati della prenotazione
+        materia = tracker.get_slot("materia")
+        data = tracker.get_slot("data")
+        ora = tracker.get_slot("ora")
+        tutor_scelto = tracker.get_slot("tutor_scelto")
         
-        dispatcher.utter_message(text=riepilogo)
+        # Path al file prenotazioni
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)
+        bookings_path = os.path.join(project_root, "csv", "bookings.csv")
+        
+        # Crea i dati della prenotazione
+        from datetime import datetime
+        booking_data = {
+            'data_prenotazione': [datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
+            'materia': [materia],
+            'data_ripetizione': [data],
+            'ora_ripetizione': [ora],
+            'tutor': [tutor_scelto],
+            'user_id': [tracker.sender_id]
+        }
+        
+        df_new = pd.DataFrame(booking_data)
+        
+        # Salva nel CSV (append se esiste, crea se non esiste)
+        if os.path.exists(bookings_path):
+            df_new.to_csv(bookings_path, mode='a', header=False, index=False)
+        else:
+            df_new.to_csv(bookings_path, mode='w', header=True, index=False)
+        
+        print(f"✅ Prenotazione salvata: {tutor_scelto} - {materia} - {data} {ora}")
+        
+        # Messaggio di conferma
+        message = f"Perfetto! Ho prenotato la ripetizione di {materia} con {tutor_scelto} per il {data} alle {ora}."
+        dispatcher.utter_message(text=message)
         
         return []

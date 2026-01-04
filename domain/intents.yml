@@ -1,0 +1,16 @@
+version: '3.1'
+
+intents:
+- /start
+- greet
+- request_tutoring   
+- affirm
+- deny
+- choose_tutor
+- goodbye
+- thankyou
+- book_tutoring
+- ask_subjects
+- inform_slot
+- ask_how_it_works
+- ask_availability

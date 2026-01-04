@@ -1,0 +1,51 @@
+version: "3.1"
+
+slots:
+  materia:
+    type: categorical
+    values:
+      - matematica
+      - italiano
+      - chimica
+    mappings:
+      - type: from_entity
+        entity: materia
+
+  data:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: data
+
+  ora:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: ora
+
+  available_tutors:
+    type: bool
+    influence_conversation: true 
+    mappings:
+      - type: custom
+
+  tutors_list:
+    type: any
+    influence_conversation: false 
+    mappings:
+      - type: custom
+
+  tutor_scelto:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text 
+        intent: choose_tutor
+
+  requested_slot:
+    type: any
+    influence_conversation: false
+    mappings:
+      - type: custom
