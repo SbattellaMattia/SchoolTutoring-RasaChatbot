@@ -4,7 +4,7 @@ rules:
 - rule: Saluta l'utente
   steps:
   - intent: greet
-  - action: utter_greet
+  - action: action_greet
 
 - rule: Attiva form per prenotazione ripetizioni
   steps:

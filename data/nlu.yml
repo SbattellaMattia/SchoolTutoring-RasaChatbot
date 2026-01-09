@@ -110,6 +110,20 @@ nlu:
     - va bene [Laura](tutor_name)
     - prenoto con [Giuseppe](tutor_name)
 
+- intent: provide_number
+  examples: |
+    - il mio numero è [+39 123 456 7890](cellulare)
+    - [3281234567](cellulare)
+    - puoi chiamarmi al [+39 328 123 4567](cellulare)
+
+- intent: show_bookings
+  examples: |
+    - voglio vedere le mie prenotazioni
+    - mostrami le prenotazioni
+    - quali sono le mie ripetizioni
+    - ho delle prenotazioni?
+    - visualizza prenotazioni
+
 - intent: goodbye
   examples: |
     - arrivederci

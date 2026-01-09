@@ -14,3 +14,5 @@ intents:
 - inform_slot
 - ask_how_it_works
 - ask_availability
+- show_bookings
+- provide_number

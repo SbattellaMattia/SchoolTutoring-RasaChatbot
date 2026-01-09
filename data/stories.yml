@@ -9,10 +9,14 @@ stories:
 - story: Prenotazione ripetizione con successo
   steps:
   - intent: greet
-  - action: utter_greet
+  - action: action_greet
   - intent: request_tutoring
   - action: tutoring_form
   - active_loop: tutoring_form
+  - slot_was_set:
+    - requested_slot: cellulare  
+  - slot_was_set:
+    - cellulare: "+39 123 456 7890"
   - slot_was_set:
     - requested_slot: materia
   - slot_was_set:
@@ -40,7 +44,7 @@ stories:
 - story: Nessun tutor disponibile - riprova
   steps:
   - intent: greet
-  - action: utter_greet
+  - action: action_greet
   - intent: request_tutoring
   - action: tutoring_form
   - active_loop: tutoring_form
@@ -72,7 +76,7 @@ stories:
 - story: Conversazione completa
   steps:
   - intent: greet
-  - action: utter_greet
+  - action: action_greet
   - intent: request_tutoring
   - action: tutoring_form
   - active_loop: tutoring_form
@@ -86,3 +90,12 @@ stories:
   - action: utter_goodbye
 
 
+- story: Mostra prenotazioni senza numero telefono
+  steps:
+  - intent: show_bookings
+  - action: action_show_bookings
+  - slot_was_set:
+    - cellulare: null
+  - action: utter_ask_cellulare
+  - intent: provide_number
+  - action: action_show_bookings

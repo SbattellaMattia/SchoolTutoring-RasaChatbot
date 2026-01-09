@@ -5,6 +5,10 @@ responses:
     - text: "Ciao! Sono l'assistente per le ripetizioni. Come posso aiutarti?"
     - text: "Buongiorno! Sono qui per aiutarti a trovare un tutor. Di cosa hai bisogno?"
 
+  utter_ask_cellulare:
+    - text: "Per favore, forniscimi il tuo numero di cellulare."
+    - text: "Inserisci il tuo numero di telefono associato alla prenotazione."
+
   utter_ask_materia:
     - text: "In quale materia hai bisogno di ripetizioni?"
     - text: "Per quale materia cerchi un tutor?"
@@ -52,14 +56,14 @@ responses:
     - text: "♻️ Ok, ricomincio da capo! Come posso aiutarti?"
 
   utter_help:
-    - text: "❓ **Come funziona il bot**
+    - text: "Come funziona il bot ❓ 
         
         Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:
         
-        📚 **Cerca tutor** - Ti aiuto a trovare tutor disponibili per la materia che ti serve
-        📅 **Prenota lezioni** - Prenoto le tue lezioni con il tutor scelto
-        👤 **Visualizza prenotazioni** - Mostro le tue lezioni prenotate
+        📚 Cerca tutor - Ti aiuto a trovare tutor disponibili per la materia che ti serve
+        📅 Prenota lezioni - Prenoto le tue lezioni con il tutor scelto
+        👤 Visualizza prenotazioni - Mostro le tue lezioni prenotate
         
         🚀 Per iniziare, dimmi per quale materia cerchi un tutor!
         
-        Per vedere i comandi principali clicca sul menù in basso a sinisstra. Buono studio!"
+        Per vedere i comandi principali clicca sul menù in basso a sinistra. Buono studio!"

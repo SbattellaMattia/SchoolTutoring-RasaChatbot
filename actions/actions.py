@@ -8,6 +8,33 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 
+class ActionGreet(Action):
+    def name(self) -> Text:
+        return "action_greet"
+
+    def run(self, dispatcher, tracker, domain):
+        metadata = tracker.latest_message.get("metadata", {}) or {}
+        first_name = metadata.get("first_name")
+        last_name = metadata.get("last_name")
+
+        # Salva negli slot
+        events = []
+        if first_name:
+            events.append(SlotSet("user_first_name", first_name))
+        if last_name:
+            events.append(SlotSet("user_last_name", last_name))
+
+        # Messaggio di saluto
+        if first_name:
+            dispatcher.utter_message(text=f"Ciao {first_name}! 👋 Come posso aiutarti?")
+        else:
+            dispatcher.utter_message(text="Ciao! 👋 Come posso aiutarti?")
+
+        return events
+
+
+
+
 
 class ActionSearchTutors(Action):
     """Action per cercare tutor disponibili nel database CSV"""
@@ -81,7 +108,8 @@ class ActionSearchTutors(Action):
                 
                 # Crea bottone per ogni tutor
                 button_title = f"👤 {nome_completo} - {costo}€/ora"
-                button_payload = f"/choose_tutor{{\"tutor_name\":\"{nome_completo}\"}}"
+                #button_payload = f"/choose_tutor{{\"tutor_name\":\"{nome_completo}\"}}"
+                button_payload = nome_completo
                 
                 buttons.append({
                     "title": button_title,
@@ -91,7 +119,8 @@ class ActionSearchTutors(Action):
             # Invia messaggio con bottoni
             dispatcher.utter_message(
                 text=message,
-                buttons=buttons,                button_type="vertical"
+                buttons=buttons,
+                button_type="vertical"
             )
 
             return [
@@ -109,6 +138,15 @@ class ActionSearchTutors(Action):
             ]
 
 
+
+
+
+
+
+
+
+
+
 class ActionResetSlots(Action):
     """Action per resettare gli slot e ricominciare"""
 
@@ -123,6 +161,7 @@ class ActionResetSlots(Action):
     ) -> List[Dict[Text, Any]]:
 
         return [
+            SlotSet("cellulare", None),
             SlotSet("materia", None),
             SlotSet("data", None),
             SlotSet("ora", None),
@@ -130,6 +169,15 @@ class ActionResetSlots(Action):
             SlotSet("tutors_list", None),
             SlotSet("tutor_scelto", None),
         ]
+
+
+
+
+
+
+
+
+
 
 
 class ValidateTutoringForm(FormValidationAction):
@@ -149,6 +197,10 @@ class ValidateTutoringForm(FormValidationAction):
 
         materie_valide = ["matematica", "italiano", "chimica"]
 
+        # Caso: il form è appena partito, non c'è ancora un valore vero
+        if slot_value is None or str(slot_value).strip() == "":
+            return {"materia": None}
+        
         if slot_value and slot_value.lower() in materie_valide:
             return {"materia": slot_value.lower()}
         else:
@@ -231,11 +283,6 @@ class ActionConfirmBooking(Action):
                 if not tutor_scelto:
                     tutor_scelto = tutors_list[0]['nome']
         
-        # Messaggio di conferma
-        message = f"Perfetto! Ho prenotato la ripetizione di {materia} con {tutor_scelto} per il {data} alle {ora}."
-        
-        dispatcher.utter_message(text=message)
-        
         return [SlotSet("tutor_scelto", tutor_scelto)]
     
 
@@ -266,10 +313,60 @@ class ActionConfirmTutor(Action):
         
 
 class ActionSaveBooking(Action):
-    """Salva la prenotazione nel file bookings.csv"""
-
     def name(self) -> Text:
         return "action_save_booking"
+
+    def run(self, dispatcher, tracker, domain):
+
+        phone_number = tracker.get_slot("cellulare")
+        materia = tracker.get_slot("materia")
+        data = tracker.get_slot("data")
+        ora = tracker.get_slot("ora")
+        tutor_scelto = tracker.get_slot("tutor_scelto")
+
+        # Recupera nome/cognome utente dagli slot
+        first_name = tracker.get_slot("user_first_name")
+        last_name = tracker.get_slot("user_last_name")
+
+        # Path CSV
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)
+        bookings_path = os.path.join(project_root, "actions", "csv", "bookings.csv")
+
+        from datetime import datetime
+        booking_data = {
+            "richiedente": [first_name + " " + last_name],
+            "cellulare": [phone_number],
+            "materia": [materia],
+            "data_prenotazione": [datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
+            "data_ripetizione": [data],
+            "ora_ripetizione": [ora],
+            "tutor_scelto": [tutor_scelto],
+        }
+
+        df_new = pd.DataFrame(booking_data)
+
+        if os.path.exists(bookings_path):
+            df_new.to_csv(bookings_path, mode="a", header=False, index=False)
+        else:
+            df_new.to_csv(bookings_path, mode="w", header=True, index=False)
+
+        # Conferma personalizzata
+        display_name = first_name if first_name else "utente"
+        msg = (
+            f"Perfetto {display_name}! "
+            f"Ho prenotato la lezione di {materia} con {tutor_scelto} in data: {data} alle {ora}."
+        )
+        dispatcher.utter_message(text=msg)
+
+        return []
+
+
+class ActionShowBookings(Action):
+    """Mostra le prenotazioni dell'utente filtrate per numero di telefono"""
+
+    def name(self) -> Text:
+        return "action_show_bookings"
 
     def run(
         self,
@@ -278,40 +375,45 @@ class ActionSaveBooking(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
         
-        # Recupera i dati della prenotazione
-        materia = tracker.get_slot("materia")
-        data = tracker.get_slot("data")
-        ora = tracker.get_slot("ora")
-        tutor_scelto = tracker.get_slot("tutor_scelto")
+        # Recupera il numero di telefono
+        phone_number = tracker.get_slot("cellulare")
+        
+        if not phone_number:
+            dispatcher.utter_message(text="Per visualizzare le tue prenotazioni, inserisci il tuo numero di telefono.")
+            return []
         
         # Path al file prenotazioni
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(current_dir)
-        bookings_path = os.path.join(project_root, "csv", "bookings.csv")
+        bookings_path = os.path.join(project_root, "actions", "csv", "bookings.csv")
         
-        # Crea i dati della prenotazione
-        from datetime import datetime
-        booking_data = {
-            'data_prenotazione': [datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
-            'materia': [materia],
-            'data_ripetizione': [data],
-            'ora_ripetizione': [ora],
-            'tutor': [tutor_scelto],
-            'user_id': [tracker.sender_id]
-        }
+        # Verifica se il file esiste
+        if not os.path.exists(bookings_path):
+            dispatcher.utter_message(text="Non ci sono prenotazioni salvate.")
+            return []
         
-        df_new = pd.DataFrame(booking_data)
+        # Leggi il CSV e filtra per numero di telefono
+        df = pd.read_csv(bookings_path)
+
+        try:
+            user_bookings = df[df['cellulare'] == phone_number]
+        except Exception as e:
+            dispatcher.utter_message(text="Errore nel leggere le prenotazioni.")
+            return []
         
-        # Salva nel CSV (append se esiste, crea se non esiste)
-        if os.path.exists(bookings_path):
-            df_new.to_csv(bookings_path, mode='a', header=False, index=False)
-        else:
-            df_new.to_csv(bookings_path, mode='w', header=True, index=False)
+        # Controlla se ci sono prenotazioni
+        if user_bookings.empty:
+            dispatcher.utter_message(text="Non hai ancora prenotazioni.")
+            return []
         
-        print(f"✅ Prenotazione salvata: {tutor_scelto} - {materia} - {data} {ora}")
+        # Formatta il messaggio con le prenotazioni
+        message = f"Ecco le tue prenotazioni:\n\n"
+        for idx, row in user_bookings.iterrows():
+            message += f"📚 {row['materia']}\n"
+            message += f"👨‍🏫 Tutor: {row['tutor']}\n"
+            message += f"📅 Data: {row['data_ripetizione']} alle {row['ora_ripetizione']}\n"
+            message += f"---\n"
         
-        # Messaggio di conferma
-        message = f"Perfetto! Ho prenotato la ripetizione di {materia} con {tutor_scelto} per il {data} alle {ora}."
         dispatcher.utter_message(text=message)
         
         return []
