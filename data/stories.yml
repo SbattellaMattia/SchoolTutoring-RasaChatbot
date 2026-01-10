@@ -36,7 +36,7 @@ stories:
   - slot_was_set:
     - available_tutors: true
   - intent: choose_tutor
-  - action: utter_confirm_booking
+  - action: action_choose_tutor
   - action: action_save_booking
   - intent: thankyou
   - action: utter_thankyou
@@ -85,17 +85,24 @@ stories:
   - slot_was_set:
     - available_tutors: true
   - intent: choose_tutor
-  - action: utter_confirm_booking
+  - action: action_choose_tutor
+  - action: action_save_booking
   - intent: goodbye
   - action: utter_goodbye
 
 
-- story: Mostra prenotazioni senza numero telefono
+- story: Mostra prenotazioni con numero
   steps:
   - intent: show_bookings
-  - action: action_show_bookings
+  - action: action_show_bookings  
+  - intent: provide_number        
   - slot_was_set:
-    - cellulare: null
-  - action: utter_ask_cellulare
-  - intent: provide_number
-  - action: action_show_bookings
+    - cellulare: null            
+  - action: action_show_bookings 
+
+- story: Mostra prenotazioni (già ha numero)
+  steps:
+  - slot_was_set:
+    - cellulare: "+39 123 456 7890"            
+  - intent: show_bookings
+  - action: action_show_bookings 

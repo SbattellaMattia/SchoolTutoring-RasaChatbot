@@ -108,7 +108,6 @@ class ActionSearchTutors(Action):
                 
                 # Crea bottone per ogni tutor
                 button_title = f"👤 {nome_completo} - {costo}€/ora"
-                #button_payload = f"/choose_tutor{{\"tutor_name\":\"{nome_completo}\"}}"
                 button_payload = nome_completo
                 
                 buttons.append({
@@ -173,15 +172,10 @@ class ActionResetSlots(Action):
 
 
 
-
-
-
-
-
-
+#=================== VALIDATE FORM ====================
 
 class ValidateTutoringForm(FormValidationAction):
-    """Validazione custom per il form di prenotazione"""
+    """Validazione custom per il form di prenotazione con Duckling"""
 
     def name(self) -> Text:
         return "validate_tutoring_form"
@@ -201,11 +195,12 @@ class ValidateTutoringForm(FormValidationAction):
         if slot_value is None or str(slot_value).strip() == "":
             return {"materia": None}
         
-        if slot_value and slot_value.lower() in materie_valide:
-            return {"materia": slot_value.lower()}
+        materia_clean = str(slot_value).lower().strip()
+        if materia_clean in materie_valide:
+            return {"materia": materia_clean}
         else:
             dispatcher.utter_message(
-                text=f"Mi dispiace, al momento offriamo solo ripetizioni di matematica, italiano e chimica."
+                text="Mi dispiace, al momento offriamo solo ripetizioni di matematica, italiano e chimica."
             )
             return {"materia": None}
 
@@ -216,14 +211,32 @@ class ValidateTutoringForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Valida la data inserita"""
-
-        # Qui potresti aggiungere logica per parsare e validare la data
-        # Per ora accettiamo qualsiasi valore
-        if slot_value:
-            return {"data": slot_value}
-        else:
+        """Valida la data usando Duckling. Accetta 'domani', '14 settembre', ecc."""
+        
+        if slot_value is None or str(slot_value).strip() == "":
             return {"data": None}
+
+        # Cerca entità Duckling nel messaggio corrente
+        latest_message_entities = tracker.latest_message.get("entities", [])
+        date_entities = [
+            e["value"] for e in latest_message_entities 
+            if e.get("extractor") == "DucklingHTTPExtractor" and e.get("entity") == "time"
+        ]
+
+        if date_entities:
+            # Duckling ha estratto una data valida
+            return {"data": date_entities[0]}
+        
+        # Fallback: accetta anche date testuali semplici
+        data_clean = str(slot_value).strip().lower()
+        parole_data = ["domani", "oggi", "dopodomani"]
+        if any(parola in data_clean for parola in parole_data):
+            return {"data": slot_value}
+        
+        dispatcher.utter_message(
+            text="Non ho capito la data. Puoi dire 'domani', '14 settembre', 'sabato' o una data precisa?"
+        )
+        return {"data": None}
 
     def validate_ora(
         self,
@@ -232,20 +245,51 @@ class ValidateTutoringForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Valida l'ora inserita"""
+        """Valida l'ora nel formato XX:XX o XX (es. 15:00, 15)"""
 
-        # Qui potresti aggiungere logica per validare il formato dell'ora
-        # Per ora accettiamo qualsiasi valore
-        if slot_value:
-            return {"ora": slot_value}
-        else:
+        if slot_value is None or str(slot_value).strip() == "":
             return {"ora": None}
 
-class ActionConfirmBooking(Action):
-    """Action per confermare la prenotazione"""
+        ora_str = str(slot_value).strip()
+        
+        # Cerca entità Duckling time
+        latest_message_entities = tracker.latest_message.get("entities", [])
+        time_entities = [
+            e["value"] for e in latest_message_entities 
+            if e.get("extractor") == "DucklingHTTPExtractor" and e.get("entity") == "time"
+        ]
+
+        if time_entities:
+            # Duckling ha estratto un'ora valida
+            return {"ora": time_entities[0]}
+
+        # Regex per validare formato XX:XX o XX
+        import re
+        pattern_ora = r'^\s*(?:(\d{1,2}):?(\d{0,2})\s*)?$'
+        match = re.match(pattern_ora, ora_str)
+
+        if match:
+            ore = int(match.group(1))
+            minuti = int(match.group(2) or 0)
+            
+            # Validazione logica: 0-23 ore, 0-59 minuti
+            if 0 <= ore <= 23 and 0 <= minuti <= 59:
+                formato_ora = f"{ore:02d}:{minuti:02d}"
+                return {"ora": formato_ora}
+        
+        dispatcher.utter_message(
+            text="Non ho capito l'ora. Si accetta il formato 'hh:mm' o 'hh'. Prova di nuovo."
+        )
+        return {"ora": None}
+    
+
+#======================================================================================
+
+class ActionChooseTutor(Action):
+    """Gestisce la scelta del tutor tramite bottoni OPPURE testo naturale"""
 
     def name(self) -> Text:
-        return "action_confirm_booking"
+        return "action_choose_tutor"
 
     def run(
         self,
@@ -254,39 +298,41 @@ class ActionConfirmBooking(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
         
-        # Recupera gli slot
-        materia = tracker.get_slot("materia")
-        data = tracker.get_slot("data")
-        ora = tracker.get_slot("ora")
         tutors_list = tracker.get_slot("tutors_list")
+        if not tutors_list:
+            dispatcher.utter_message(text="Prima devi cercare i tutor disponibili.")
+            return []
         
-        # Gestisci la scelta del tutor
-        last_message = tracker.latest_message.get('text', '').lower()
+        last_message = tracker.latest_message.get("text", "").lower().strip()
+        tutor_text = None
         
-        tutor_scelto = None
+        # 1️⃣ METODO BOTTONI: payload = nome completo
+        if last_message in [t["nome"] for t in tutors_list]:
+            tutor_text = last_message
+            print(f"✅ Tutor selezionato da bottone: {tutor_text}")
         
-        if tutors_list:
-            if "primo" in last_message or "1" in last_message:
-                tutor_scelto = tutors_list[0]['nome']
-            elif "secondo" in last_message or "2" in last_message:
-                tutor_scelto = tutors_list[1]['nome'] if len(tutors_list) > 1 else tutors_list[0]['nome']
-            elif "terzo" in last_message or "3" in last_message:
-                tutor_scelto = tutors_list[2]['nome'] if len(tutors_list) > 2 else tutors_list[0]['nome']
-            else:
-                # Cerca il nome del tutor nel messaggio
+        # 2️⃣ METODO TESTO + ENTITY: cerca tutor_name estratto
+        elif tracker.latest_message.get("entities"):
+            tutor_entities = tracker.get_latest_entity_values("tutor_name")
+            for tutor_entity in tutor_entities:
                 for tutor in tutors_list:
-                    if tutor['nome'].lower() in last_message:
-                        tutor_scelto = tutor['nome']
+                    if tutor["nome"].lower() in tutor_entity.lower() or tutor_entity.lower() in tutor["nome"].lower():
+                        tutor_text = tutor["nome"]
+                        print(f"✅ Tutor selezionato da entity: {tutor_text}")
                         break
-                
-                # Se non trovato, prendi il primo
-                if not tutor_scelto:
-                    tutor_scelto = tutors_list[0]['nome']
+                if tutor_text:
+                    break
         
-        return [SlotSet("tutor_scelto", tutor_scelto)]
-    
+        if tutor_text:
+            return [SlotSet("tutor_scelto", tutor_text)]
+        else:
+            dispatcher.utter_message(
+                text="Non ho capito quale tutor hai scelto. Usa i bottoni qui sopra o dimmi il nome/número."
+            )
+            return []
 
-class ActionConfirmTutor(Action):
+
+'''class ActionConfirmTutor(Action):
     """Gestisce la scelta del tutor e salva la prenotazione"""
 
     def name(self) -> Text:
@@ -310,7 +356,7 @@ class ActionConfirmTutor(Action):
                 text="Non ho capito quale tutor hai scelto. Riprova."
             )
             return []
-        
+        '''
 
 class ActionSaveBooking(Action):
     def name(self) -> Text:
@@ -335,7 +381,7 @@ class ActionSaveBooking(Action):
 
         from datetime import datetime
         booking_data = {
-            "richiedente": [first_name + " " + last_name],
+            "richiedente": [str(first_name)],
             "cellulare": [phone_number],
             "materia": [materia],
             "data_prenotazione": [datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
@@ -377,11 +423,11 @@ class ActionShowBookings(Action):
         
         # Recupera il numero di telefono
         phone_number = tracker.get_slot("cellulare")
-        
+
         if not phone_number:
-            dispatcher.utter_message(text="Per visualizzare le tue prenotazioni, inserisci il tuo numero di telefono.")
+            dispatcher.utter_message("Per favore, fornisci il tuo numero di telefono")
             return []
-        
+
         # Path al file prenotazioni
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(current_dir)
@@ -396,7 +442,7 @@ class ActionShowBookings(Action):
         df = pd.read_csv(bookings_path)
 
         try:
-            user_bookings = df[df['cellulare'] == phone_number]
+            user_bookings = df[df['cellulare'].astype(str) == str(phone_number)]
         except Exception as e:
             dispatcher.utter_message(text="Errore nel leggere le prenotazioni.")
             return []
@@ -410,7 +456,7 @@ class ActionShowBookings(Action):
         message = f"Ecco le tue prenotazioni:\n\n"
         for idx, row in user_bookings.iterrows():
             message += f"📚 {row['materia']}\n"
-            message += f"👨‍🏫 Tutor: {row['tutor']}\n"
+            message += f"👨‍🏫 Tutor: {row['tutor_scelto']}\n"
             message += f"📅 Data: {row['data_ripetizione']} alle {row['ora_ripetizione']}\n"
             message += f"---\n"
         

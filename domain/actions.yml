@@ -5,6 +5,7 @@ actions:
   - action_search_tutors
   - action_reset_slots
   - action_confirm_tutor
+  - action_choose_tutor 
   - action_save_booking
   - action_show_bookings
   - validate_tutoring_form

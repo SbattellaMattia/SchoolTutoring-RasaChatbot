@@ -1,2 +1,5 @@
-richiedente, cellulare, data_prenotazione, materia, data_ripetizione, ora_ripetizione, tutor_scelto
-Mattia Sbattella,5,2026-01-09 12:24:42,matematica,domani,15:00,Marco Ferrari
+richiedente,cellulare,materia,data_prenotazione,data_ripetizione,ora_ripetizione,tutor_scelto
+Mattia Sbattella,5,matematica,2026-01-09 12:24:42,domani,15:00,Marco Ferrari
+Mattia Sbattella,7,matematica,2026-01-09 23:21:02,domani,17:00,Laura Bianchi
+Mattia Sbattella,5,matematica,2026-01-09 12:24:42,domani,15:00,Marco Ferrari
+Mattia Sbattella,5,matematica,2026-01-09 12:24:42,domani,15:00,Marco Ferrari
