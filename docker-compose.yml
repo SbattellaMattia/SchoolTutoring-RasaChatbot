@@ -35,6 +35,7 @@ services:
       - ./:/app
     ports:
       - "5005:5005"
+      - "5006:5006"
     depends_on:
       - action-server
       - duckling

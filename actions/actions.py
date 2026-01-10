@@ -1,11 +1,14 @@
 # actions.py
 from typing import Any, Text, Dict, List
+from urllib import parse
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, AllSlotsReset
 from rasa_sdk.types import DomainDict
 import pandas as pd
-from datetime import datetime, timedelta
+from dateutil.parser import parse
+from datetime import datetime, date, timedelta
+import re
 import os
 
 class ActionGreet(Action):
@@ -204,39 +207,42 @@ class ValidateTutoringForm(FormValidationAction):
             )
             return {"materia": None}
 
-    def validate_data(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Valida la data usando Duckling. Accetta 'domani', '14 settembre', ecc."""
-        
+    def validate_data(self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> Dict[Text, Any]:
+        """Duckling: normalizza time.value in gg/mm/aaaa, rifiuta passato."""
         if slot_value is None or str(slot_value).strip() == "":
             return {"data": None}
 
-        # Cerca entità Duckling nel messaggio corrente
+        # Cerca Duckling time entities
         latest_message_entities = tracker.latest_message.get("entities", [])
-        date_entities = [
-            e["value"] for e in latest_message_entities 
-            if e.get("extractor") == "DucklingHTTPExtractor" and e.get("entity") == "time"
+        duckling_entities = [
+            e for e in latest_message_entities 
+            if e.get("extractor") == "DucklingEntityExtractor" and e.get("entity") == "time"
         ]
+        
+        if not duckling_entities:
+            dispatcher.utter_message(
+                text="Non ho capito la data. Riprova con espressioni come '17 gennaio', 'domani', '15 settembre', 'sabato'."
+            )
+            return {"data": None}
 
-        if date_entities:
-            # Duckling ha estratto una data valida
-            return {"data": date_entities[0]}
+        # Prendi prima entità Duckling
+        entity = duckling_entities[0]
+        value = entity["value"]
+
+        # La stringa è: 🐤 Duckling time entity value: 2026-03-04T00:00:00.000+01:00
+        print(f"🐤 Duckling time entity value: {value}")
         
-        # Fallback: accetta anche date testuali semplici
-        data_clean = str(slot_value).strip().lower()
-        parole_data = ["domani", "oggi", "dopodomani"]
-        if any(parola in data_clean for parola in parole_data):
-            return {"data": slot_value}
-        
-        dispatcher.utter_message(
-            text="Non ho capito la data. Puoi dire 'domani', '14 settembre', 'sabato' o una data precisa?"
-        )
-        return {"data": None}
+        normalized = parse(value).date()
+            
+        # Rifiuta passato
+        if normalized < date.today():
+            dispatcher.utter_message(text="La data non può essere passata. Riprova.")
+            return {"data": None}
+            
+        # Normalizza in gg/mm/aaaa
+        return {"data": normalized.strftime("%d/%m/%Y")}
+            
+       
 
     def validate_ora(
         self,
@@ -330,33 +336,6 @@ class ActionChooseTutor(Action):
                 text="Non ho capito quale tutor hai scelto. Usa i bottoni qui sopra o dimmi il nome/número."
             )
             return []
-
-
-'''class ActionConfirmTutor(Action):
-    """Gestisce la scelta del tutor e salva la prenotazione"""
-
-    def name(self) -> Text:
-        return "action_confirm_tutor"
-
-    def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
-    ) -> List[Dict[Text, Any]]:
-        
-        # Estrai il nome del tutor dall'entity
-        tutor_name = next(tracker.get_latest_entity_values("tutor_name"), None)
-        
-        if tutor_name:
-            # Salva la prenotazione
-            return [SlotSet("tutor_scelto", tutor_name)]
-        else:
-            dispatcher.utter_message(
-                text="Non ho capito quale tutor hai scelto. Riprova."
-            )
-            return []
-        '''
 
 class ActionSaveBooking(Action):
     def name(self) -> Text:
