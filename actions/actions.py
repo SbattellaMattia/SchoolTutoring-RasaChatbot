@@ -436,13 +436,140 @@ class ActionShowBookings(Action):
             return []
         
         # Formatta il messaggio con le prenotazioni
-        message = f"Ecco le tue prenotazioni:\n\n"
+        message = f"*Ecco le tue prenotazioni:*\n\n"
         for idx, row in user_bookings.iterrows():
             message += f"📚 {row['materia']}\n"
             message += f"👨‍🏫 Tutor: {row['tutor_scelto']}\n"
             message += f"📅 Data: {row['data_ripetizione']} alle {row['ora_ripetizione']}\n"
-            message += f"---\n"
+            message += f"\n\n"
         
-        dispatcher.utter_message(text=message)
+        # Invia il messaggio 
+        dispatcher.utter_message(
+            json_message={
+                "text": message,
+                "parse_mode": "Markdown"
+            }
+        )
         
         return []
+    
+
+
+    #======================================================================================
+    class ActionShowSubjects(Action):
+        def name(self) -> Text:
+            return "action_show_subjects"
+
+        def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+        ) -> List[Dict[Text, Any]]:
+            
+            # Path al file prenotazioni
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(current_dir)
+            tutor_path = os.path.join(project_root, "actions", "csv", "tutor.csv")
+            
+            try:
+                # Leggi il CSV
+                df = pd.read_csv(tutor_path)
+                
+                # Ottieni le materie uniche
+                materie = df['materia'].unique().tolist()
+                
+                # Crea i bottoni per Telegram
+                buttons = []
+                for materia in materie:
+                    buttons.append({
+                        "title": materia.capitalize(),
+                        "payload": f"/seleziona_materia{{\"materia\":\"{materia}\"}}"
+                    })
+                
+                # Invia il messaggio con i bottoni
+                dispatcher.utter_message(
+                    text="Seleziona la materia per vedere i tutor disponibili:",
+                    buttons=buttons,
+                    button_type="vertical"
+                )
+                
+            except Exception as e:
+                dispatcher.utter_message(
+                    text=f"Mi dispiace, si è verificato un errore nel caricare le materie."
+                )
+                print(f"Errore: {e}")
+            
+            return []
+
+
+    class ActionShowTutorPerSubject(Action):
+        def name(self) -> Text:
+            return "action_show_tutor_per_subject"
+
+        def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+        ) -> List[Dict[Text, Any]]:
+            
+            # Ottieni la materia dallo slot
+            materia = tracker.get_slot("materia")
+            
+            if not materia:
+                dispatcher.utter_message(
+                    text="Non ho capito quale materia ti interessa. Riprova."
+                )
+                return []
+            
+            # Path al file prenotazioni
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(current_dir)
+            tutor_path = os.path.join(project_root, "actions", "csv", "tutor.csv")
+            
+            try:
+                # Leggi il CSV
+                df = pd.read_csv(tutor_path)
+                
+                # Filtra per materia
+                tutor_materia = df[df['materia'].str.lower() == materia.lower()]
+                
+                if tutor_materia.empty:
+                    dispatcher.utter_message(
+                        text=f"Non ho trovato tutor disponibili per {materia}."
+                    )
+                    return [SlotSet("materia", None)]
+                
+                # Raggruppa per tutor (nome + cognome)
+                tutor_gruppi = tutor_materia.groupby(['nome', 'cognome', 'costo_ora'])
+                
+                messaggio = f"🎓 *Tutor disponibili per {materia.upper()}:*\n\n"
+                
+                for (nome, cognome, costo), gruppo in tutor_gruppi:
+                    messaggio += f"👨‍🏫 *{nome} {cognome}*\n"
+                    messaggio += f"💰 Costo: €{costo}/ora\n"
+                    messaggio += f"📅 Disponibilità:\n"
+                    
+                    for _, riga in gruppo.iterrows():
+                        giorno = riga['disponibilita_giorno'].capitalize()
+                        ora = riga['disponibilita_ora']
+                        messaggio += f"   • {giorno}: {ora}\n"
+                    
+                    messaggio += "\n"
+                
+                # Invia il messaggio 
+                dispatcher.utter_message(
+                    json_message={
+                        "text": messaggio,
+                        "parse_mode": "Markdown"
+                    }
+                )
+                
+            except Exception as e:
+                dispatcher.utter_message(
+                    text=f"Mi dispiace, si è verificato un errore."
+                )
+                print(f"Errore: {e}")
+            
+            return [SlotSet("materia", None)]

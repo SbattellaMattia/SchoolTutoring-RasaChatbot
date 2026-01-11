@@ -6,6 +6,7 @@ intents:
 - request_tutoring   
 - affirm
 - deny
+- search_tutor
 - choose_tutor
 - goodbye
 - thankyou
@@ -18,3 +19,8 @@ intents:
 - ask_availability
 - show_bookings
 - provide_number
+- app_detail
+- creator_app_detail
+- security_app_detail
+- subject_list_info
+- bot_challenge

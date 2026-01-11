@@ -8,4 +8,7 @@ actions:
   - action_choose_tutor 
   - action_save_booking
   - action_show_bookings
+  - action_show_subjects
+  - action_show_tutor_per_subject
+  - action_subject_list_info
   - validate_tutoring_form

@@ -1,0 +1,24 @@
+version: "3.1"
+
+stories:
+  - story: ricerca tutor per materia
+    steps:
+      - intent: search_tutor
+      - action: action_show_subjects
+      - intent: inform_slot
+        entities:
+          - materia
+      - slot_was_set:
+          - materia
+      - action: action_show_tutor_per_subject
+      
+  - story: chiedi materie poi cerca tutor
+    steps:
+      - intent: ask_subjects
+      - action: action_show_subjects
+      - intent: inform_slot
+        entities:
+          - materia
+      - slot_was_set:
+          - materia
+      - action: action_show_tutor_per_subject

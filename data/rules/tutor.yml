@@ -1,0 +1,12 @@
+version: "3.1"
+
+rules:
+  - rule: Mostra materie quando l'utente cerca tutor
+    steps:
+      - intent: search_tutor
+      - action: action_show_subjects
+      
+  - rule: Mostra materie quando richieste
+    steps:
+      - intent: ask_subjects
+      - action: action_show_subjects

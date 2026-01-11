@@ -52,17 +52,9 @@ nlu:
       - Funzionalità di sicurezza
       - Protezione dati
 
-  - intent: service_list_info
+  - intent: subject_list_info
     examples: |
-      - Quali servizi offrite?
-      - Elenca tutti i servizi
-      - Mostrami i servizi
-      - Servizi disponibili
-      - Con cosa potete aiutarmi?
-      - Lista servizi
-      - Parlami dei vostri servizi
-      - Quali servizi sono disponibili?
-      - Elenco servizi
+     - DA DEFINIRE
 
   - intent: bot_challenge
     examples: |

@@ -1,0 +1,22 @@
+version: "3.1"
+
+nlu:
+  - intent: search_tutor
+    examples: |
+      - voglio vedere i tutor
+      - mostrami i tutor
+      - tutor disponibili
+      - chi sono i tutor
+      - lista tutor
+      - /tutor
+      - vedere i tutor per materia
+      - quali tutor ci sono
+
+  - intent: ask_subjects
+    examples: |
+      - quali materie
+      - materie disponibili
+      - che materie ci sono
+      - lista materie
+      - mostrami le materie
+      - materie

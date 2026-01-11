@@ -34,4 +34,4 @@ rules:
 - rule: Help command
   steps:
     - intent: help
-    - action: utter_help
+    - action: utter_app_detail
