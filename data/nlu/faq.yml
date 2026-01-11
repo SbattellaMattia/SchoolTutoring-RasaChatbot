@@ -1,0 +1,75 @@
+version: "3.1"
+
+nlu:
+
+  - intent: app_detail
+    examples: |
+      - /aiuto
+      - /help
+      - aiuto
+      - help
+      - come funziona
+      - cosa puoi fare
+      - come posso usarti
+      - cosa devo fare
+      - come funziona il bot
+      - spiegami come funzioni
+      - non ho capito
+      - ho bisogno di aiuto
+      - guida
+      - istruzioni
+      - parlami dell'app
+      - cos'è questa applicazione?
+      - dammi informazioni sull'app
+      - puoi descrivere l'applicazione?
+      - Cosa fa questa app?
+      - informazioni sull'app
+      - voglio sapere di questa app
+      - spiega l'applicazione
+      - dettagli applicazione
+
+  - intent: creator_app_detail
+    examples: |
+      - Chi gestisce questa app?
+      - Parlami degli operatori
+      - Chi c'è dietro questa applicazione?
+      - Informazioni sull'operatore
+      - Chi amministra l'app?
+      - Dammi dettagli sull'operatore
+      - Chi ha sviluppato questa app?
+      - Operatore dell'applicazione
+      - Chi sono i gestori?
+
+  - intent: security_app_detail
+    examples: |
+      - Questa app è sicura?
+      - Parlami della sicurezza
+      - Quanto è sicura l'applicazione?
+      - Informazioni sulla sicurezza
+      - Quali misure di sicurezza avete?
+      - Dettagli sulla sicurezza dell'app
+      - I miei dati sono al sicuro?
+      - Funzionalità di sicurezza
+      - Protezione dati
+
+  - intent: service_list_info
+    examples: |
+      - Quali servizi offrite?
+      - Elenca tutti i servizi
+      - Mostrami i servizi
+      - Servizi disponibili
+      - Con cosa potete aiutarmi?
+      - Lista servizi
+      - Parlami dei vostri servizi
+      - Quali servizi sono disponibili?
+      - Elenco servizi
+
+  - intent: bot_challenge
+    examples: |
+      - bot_challenge
+      - sei un bot?
+      - sei un umano?
+      - sto parlando con un bot?
+      - sto parlando con un umano?
+      - sei un robot?
+      - sei una persona?

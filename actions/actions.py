@@ -182,6 +182,26 @@ class ValidateTutoringForm(FormValidationAction):
 
     def name(self) -> Text:
         return "validate_tutoring_form"
+    
+    def validate_cellulare(self, slot_value, dispatcher, tracker, domain):
+        if slot_value is None:
+            return {"cellulare": None}
+
+        latest_message_entities = tracker.latest_message.get("entities", [])
+        phone_entities = [
+            e for e in latest_message_entities 
+            if e.get("extractor") == "DucklingEntityExtractor" and e.get("entity") == "phone-number"
+        ]
+
+        if phone_entities:
+            print(f"📞 Phone: {phone_entities[0]}")
+            phone_value = phone_entities[0]
+            print(f"📞 Phone: {phone_value}")
+            return {"cellulare": phone_value}
+    
+        dispatcher.utter_message("Numero non riconosciuto. Inserisci un numero italiano valido (10 cifre): 3451234567 o +393451234567.")
+        return {"cellulare": None}
+
 
     def validate_materia(
         self,
@@ -244,49 +264,33 @@ class ValidateTutoringForm(FormValidationAction):
             
        
 
-    def validate_ora(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Valida l'ora nel formato XX:XX o XX (es. 15:00, 15)"""
+ 
 
+    def validate_ora(self, slot_value, dispatcher, tracker, domain):
+        """Duckling: estrai ora da time.value -> HH:MM"""
         if slot_value is None or str(slot_value).strip() == "":
             return {"ora": None}
 
-        ora_str = str(slot_value).strip()
-        
-        # Cerca entità Duckling time
         latest_message_entities = tracker.latest_message.get("entities", [])
-        time_entities = [
-            e["value"] for e in latest_message_entities 
-            if e.get("extractor") == "DucklingHTTPExtractor" and e.get("entity") == "time"
-        ]
-
-        if time_entities:
-            # Duckling ha estratto un'ora valida
-            return {"ora": time_entities[0]}
-
-        # Regex per validare formato XX:XX o XX
-        import re
-        pattern_ora = r'^\s*(?:(\d{1,2}):?(\d{0,2})\s*)?$'
-        match = re.match(pattern_ora, ora_str)
-
-        if match:
-            ore = int(match.group(1))
-            minuti = int(match.group(2) or 0)
-            
-            # Validazione logica: 0-23 ore, 0-59 minuti
-            if 0 <= ore <= 23 and 0 <= minuti <= 59:
-                formato_ora = f"{ore:02d}:{minuti:02d}"
-                return {"ora": formato_ora}
+        duckling_entities = [
+            e for e in latest_message_entities 
+            if e.get("extractor") == "DucklingEntityExtractor" and e.get("entity") == "time"]
         
-        dispatcher.utter_message(
-            text="Non ho capito l'ora. Si accetta il formato 'hh:mm' o 'hh'. Prova di nuovo."
-        )
-        return {"ora": None}
+        if not duckling_entities:
+            dispatcher.utter_message(
+                text="Non ho capito l'ora. Riprova con '15', 'alle 17', '17:30'."
+            )
+            return {"ora": None}
+
+        entity = duckling_entities[0]
+        value = entity["value"]
+        print(f"🐤 Duckling time entity value: {value}")
+        
+        dt = parse(value)
+        ora = dt.strftime("%H:%M") 
+        
+        return {"ora": ora}
+
     
 
 #======================================================================================

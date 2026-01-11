@@ -7,7 +7,7 @@ responses:
 
   utter_ask_cellulare:
     - text: "Per favore, forniscimi il tuo numero di cellulare."
-    - text: "Inserisci il tuo numero di telefono associato alla prenotazione."
+    - text: "Prima di continuare, inserisci il tuo numero di telefono."
 
   utter_ask_materia:
     - text: "In quale materia hai bisogno di ripetizioni?"
@@ -33,10 +33,6 @@ responses:
     - text: "Vuoi provare con un'altra data o orario?"
     - text: "Posso cercare con una disponibilità diversa?"
 
-  utter_confirm_booking:
-    - text: "Perfetto! Ho prenotato la ripetizione di {materia} con {tutor_scelto} per il {data} alle {ora}."
-    - text: "Prenotazione confermata! Ti aspetta {tutor_scelto} per {materia} il {data} alle {ora}."
-
   utter_goodbye:
     - text: "Arrivederci! Buono studio!"
     - text: "A presto! Se hai bisogno, sono sempre qui."
@@ -45,25 +41,54 @@ responses:
     - text: "Prego, è stato un piacere aiutarti!"
     - text: "Figurati! Buone ripetizioni!"
 
+  utter_ask_continue_booking:
+    - text: "Vuoi davvero interrompere la prenotazione?"
+    - text: "Sei sicuro di voler annullare la prenotazione?"
+    - text: "Confermi di voler interrompere il processo di prenotazione?"
+
+  utter_next_action:
+    - text: "Cosa vuoi fare ora?"
+    - text: "Che cosa desideri fare adesso? "
+    - text: "Come posso esserti utile ora? "
+
   utter_default:
     - text: "Scusa, non ho capito. Puoi riformulare?"
     - text: "Mi dispiace, non ho compreso. Puoi ripetere in altro modo?"
 
-  utter_iamabot:
-    - text: "Sono un assistente virtuale per prenotare ripetizioni."
 
   utter_restart:
     - text: "♻️ Ok, ricomincio da capo! Come posso aiutarti?"
 
-  utter_help:
-    - text: "Come funziona il bot ❓ 
+
+  # FAQ responses ========================================================
+
+  utter_app_detail:
+    - text: |
+        " Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:"
         
-        Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:
-        
-        📚 Cerca tutor - Ti aiuto a trovare tutor disponibili per la materia che ti serve
-        📅 Prenota lezioni - Prenoto le tue lezioni con il tutor scelto
-        👤 Visualizza prenotazioni - Mostro le tue lezioni prenotate
-        
-        🚀 Per iniziare, dimmi per quale materia cerchi un tutor!
-        
-        Per vedere i comandi principali clicca sul menù in basso a sinistra. Buono studio!"
+        "📚 Cerca tutor - Ti aiuto a trovare tutor disponibili per la materia che ti serve"
+        "📅 Prenota lezioni - Prenoto le tue lezioni con il tutor scelto"
+        "👤 Visualizza prenotazioni - Mostro le tue lezioni prenotate"
+        "🚀 Per iniziare, dimmi per quale materia cerchi un tutor!"
+        "Per vedere i comandi principali clicca sul menù in basso a sinistra. Buono studio!"
+
+  utter_creator_app_detail:
+    - text: "Sono stata sviluppata da un team di studenti del corso di Ingegneria informatica dell'università politecnica delle Marche."
+    - text: "Sono stata creata da un gruppo di studenti del corso di Ingegneria Informatica presso l'Università Politecnica delle Marche."
+    - text: "Il mio sviluppo è stato realizzato da un team di studenti dell'Università Politecnica delle Marche, all'interno del corso di Ingegneria Informatica."
+
+  utter_security_app_detail:
+    - text: "I tuoi dati sono al sicuro con noi! Memorizziamo unicamente i tuoi dati di contatto e le informazioni relative alle tue prenotazioni."
+    - text: "La sicurezza dei tuoi dati è una priorità per noi. Non condividiamo informazioni personali con terzi."
+    - text: "I tuoi dati vengono protetti con misure di sicurezza avanzate e non vengono utilizzati per scopi commerciali."
+
+  utter_iamabot:
+    - text: "Sono un bot, creato con Rasa."
+    - text: "Sono un assistente virtuale, sviluppato con Rasa."
+    - text: "Sono un chatbot creato utilizzando la piattaforma Rasa."
+
+  #========================================================================
+
+  
+
+  

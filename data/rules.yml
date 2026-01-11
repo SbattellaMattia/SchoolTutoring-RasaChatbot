@@ -22,10 +22,14 @@ rules:
   - intent: thankyou
   - action: utter_thankyou
 
+#- rule: Restart conversation
+  #steps:
+    #- intent: restart
+    #- action: action_reset_slots
 - rule: Restart conversation
   steps:
-    - intent: ricomincia
-    - action: action_restart
+  - intent: restart
+  - action: action_restart 
 
 - rule: Help command
   steps:

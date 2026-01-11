@@ -21,6 +21,7 @@ nlu:
 
 - intent: request_tutoring
   examples: |
+    - /ripetizioni
     - vorrei delle ripetizioni
     - ho bisogno di ripetizioni
     - cerco un tutor
@@ -153,27 +154,15 @@ nlu:
     - ottimo grazie
     - perfetto grazie
     - apprezzo molto
-
-- intent: help
-  examples: |
-    - /aiuto
-    - aiuto
-    - help
-    - come funziona
-    - cosa puoi fare
-    - come posso usarti
-    - cosa devo fare
-    - come funziona il bot
-    - spiegami come funzioni
-    - non ho capito
-    - ho bisogno di aiuto
-    - guida
-    - istruzioni
   
 - intent: restart
   examples: |
     - /ricomincia
     - ricomincia
+    - ricominciamo
+    - voglio rifare 
+    - iniziamo da capo
+    - voglio prenotarne un'altra
     - riparti da capo
     - reset
     - cancella tutto

@@ -12,6 +12,8 @@ intents:
 - book_tutoring
 - ask_subjects
 - inform_slot
+- restart
+- reset_session
 - ask_how_it_works
 - ask_availability
 - show_bookings

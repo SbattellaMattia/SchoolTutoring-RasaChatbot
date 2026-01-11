@@ -20,8 +20,8 @@ slots:
     type: text
     influence_conversation: true
     mappings:
-    - type: from_entity
-      entity: cellulare
+    - type: from_text
+      entity: phone-number
 
   materia:
     type: categorical

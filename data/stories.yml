@@ -106,3 +106,10 @@ stories:
     - cellulare: "+39 123 456 7890"            
   - intent: show_bookings
   - action: action_show_bookings 
+
+- story: reset conversation
+  steps:
+  - intent: reset_session
+  - action: action_reset_slots
+  - action: utter_restart
+  - action: action_listen
