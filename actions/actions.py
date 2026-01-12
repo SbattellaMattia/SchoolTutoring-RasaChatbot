@@ -145,36 +145,6 @@ class ActionSearchTutors(Action):
 
 
 
-
-
-
-
-class ActionResetSlots(Action):
-    """Action per resettare gli slot e ricominciare"""
-
-    def name(self) -> Text:
-        return "action_reset_slots"
-
-    def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
-    ) -> List[Dict[Text, Any]]:
-
-        return [
-            SlotSet("cellulare", None),
-            SlotSet("materia", None),
-            SlotSet("data", None),
-            SlotSet("ora", None),
-            SlotSet("available_tutors", None),
-            SlotSet("tutors_list", None),
-            SlotSet("tutor_scelto", None),
-        ]
-
-
-
-
 #=================== VALIDATE FORM ====================
 
 class ValidateTutoringForm(FormValidationAction):
@@ -455,7 +425,10 @@ class ActionShowBookings(Action):
     
 
 
-    #======================================================================================
+    #===========================================================================
+    #                           TUTOR ACTIONS
+    #===========================================================================
+
     class ActionShowSubjects(Action):
         def name(self) -> Text:
             return "action_show_subjects"
@@ -489,7 +462,7 @@ class ActionShowBookings(Action):
                 
                 # Invia il messaggio con i bottoni
                 dispatcher.utter_message(
-                    text="Seleziona la materia per vedere i tutor disponibili:",
+                    text="📚 Seleziona la materia per vedere i tutor disponibili:",
                     buttons=buttons,
                     button_type="vertical"
                 )
@@ -572,4 +545,35 @@ class ActionShowBookings(Action):
                 )
                 print(f"Errore: {e}")
             
-            return [SlotSet("materia", None)]
+            return []
+        
+
+
+    #===========================================================================
+    #                           RESET ACTIONS
+    #===========================================================================
+
+    class ActionResetSlots(Action):
+        """Action per resettare tutti gli slot della conversazione"""
+
+        def name(self) -> Text:
+            return "action_reset_slots"
+
+        def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+        ) -> List[Dict[Text, Any]]:
+            
+            # Reset di tutti gli slot
+            return [
+                AllSlotsReset(),
+                SlotSet("cellulare", None),
+                SlotSet("materia", None),
+                SlotSet("data", None),
+                SlotSet("ora", None),
+                SlotSet("available_tutors", None),
+                SlotSet("tutors_list", None),
+                SlotSet("tutor_scelto", None),
+            ]

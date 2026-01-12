@@ -154,16 +154,4 @@ nlu:
     - ottimo grazie
     - perfetto grazie
     - apprezzo molto
-  
-- intent: restart
-  examples: |
-    - /ricomincia
-    - ricomincia
-    - ricominciamo
-    - voglio rifare 
-    - iniziamo da capo
-    - voglio prenotarne un'altra
-    - riparti da capo
-    - reset
-    - cancella tutto
-    - inizia di nuovo
+

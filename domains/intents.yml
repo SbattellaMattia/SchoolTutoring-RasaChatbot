@@ -13,8 +13,6 @@ intents:
 - book_tutoring
 - ask_subjects
 - inform_slot
-- restart
-- reset_session
 - ask_how_it_works
 - ask_availability
 - show_bookings
@@ -24,3 +22,4 @@ intents:
 - security_app_detail
 - subject_list_info
 - bot_challenge
+- reset_slots 

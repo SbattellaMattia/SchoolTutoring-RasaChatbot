@@ -47,9 +47,7 @@ responses:
     - text: "Confermi di voler interrompere il processo di prenotazione?"
 
   utter_next_action:
-    - text: "Cosa vuoi fare ora?"
-    - text: "Che cosa desideri fare adesso? "
-    - text: "Come posso esserti utile ora? "
+    - text: "Perfetto! Cosa vuoi fare ora?\n📅 Prenota una lezione\n📚 Vedi le materie\n👨‍🏫 Cerca altri tutor\n❓ Hai bisogno di aiuto?"
 
   utter_default:
     - text: "Scusa, non ho capito. Puoi riformulare?"
@@ -64,13 +62,13 @@ responses:
 
   utter_app_detail:
     - text: |
-        " Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:"
+        Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:
         
-        "📚 Cerca tutor - Ti aiuto a trovare tutor disponibili per la materia che ti serve"
-        "📅 Prenota lezioni - Prenoto le tue lezioni con il tutor scelto"
-        "👤 Visualizza prenotazioni - Mostro le tue lezioni prenotate"
-        "🚀 Per iniziare, dimmi per quale materia cerchi un tutor!"
-        "Per vedere i comandi principali clicca sul menù in basso a sinistra. Buono studio!"
+        📚 Cerca tutor - Ti aiuto a trovare tutor disponibili per la materia che ti serve
+        📅 Prenota lezioni - Prenoto le tue lezioni con il tutor scelto
+        👤 Visualizza prenotazioni - Mostro le tue lezioni prenotate
+        🚀 Per iniziare, dimmi per quale materia cerchi un tutor!
+        Per vedere i comandi principali clicca sul menù in basso a sinistra. Buono studio!
 
   utter_creator_app_detail:
     - text: "Sono stata sviluppata da un team di studenti del corso di Ingegneria informatica dell'università politecnica delle Marche."

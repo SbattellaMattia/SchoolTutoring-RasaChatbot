@@ -1,0 +1,15 @@
+version: "3.1"
+
+nlu:
+  - intent: reset_slots
+    examples: |
+      - /restart
+      - ricomincia
+      - ricomincia da capo
+      - reset
+      - restart
+      - riparti
+      - nuova conversazione
+      - resetta tutto
+      - azzera
+      - torna all'inizio

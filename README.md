@@ -51,7 +51,7 @@ TELEGRAM_WEBHOOK_URL=https://<tuo_url>/webhooks/telegram/webhook
 ### 4. Train del modello
 
 ```bash
-docker-compose run rasa train --domain domain
+docker-compose run rasa train --domain domains
 ```
 Occorre esplicitare il domain poichè diviso in sottofile.
 
@@ -73,8 +73,13 @@ rasa           | 2026-01-04 00:25:03 INFO     root  - Rasa server is up and runn
 ```
 
 ## Test su Telegram
+Prima di iniziare digita il comando:
 
-Cerca il tuo bot su Telegram e prova:
+```bash
+py ./actions/telegram/set_buttons.py
+```
+Imposterà i comandi rapidi nel pulsante home in basso a sinistra.
+Dopodichè cerca il bot su Telegram e prova:
 
 - `ciao` → saluto iniziale
 - `vorrei ripetizioni` → avvia il form di prenotazione
