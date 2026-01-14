@@ -7,4 +7,8 @@ forms:
       - materia
       - data
       - ora
+      
+  phone_form: 
+    required_slots:
+      - cellulare
 

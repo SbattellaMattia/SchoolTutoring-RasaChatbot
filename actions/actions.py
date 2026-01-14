@@ -164,8 +164,7 @@ class ValidateTutoringForm(FormValidationAction):
         ]
 
         if phone_entities:
-            print(f"📞 Phone: {phone_entities[0]}")
-            phone_value = phone_entities[0]
+            phone_value = phone_entities[0].get("value")
             print(f"📞 Phone: {phone_value}")
             return {"cellulare": phone_value}
     
@@ -307,7 +306,7 @@ class ActionChooseTutor(Action):
             return [SlotSet("tutor_scelto", tutor_text)]
         else:
             dispatcher.utter_message(
-                text="Non ho capito quale tutor hai scelto. Usa i bottoni qui sopra o dimmi il nome/número."
+                text="Non ho capito quale tutor hai scelto. Usa i bottoni qui sopra o dimmi il nome."
             )
             return []
 

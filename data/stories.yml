@@ -14,7 +14,7 @@ stories:
   - action: tutoring_form
   - active_loop: tutoring_form
 
-# Chiede cellulare
+  # Chiede cellulare
   - slot_was_set:
     - requested_slot: cellulare
   # Utente risponde con numero
@@ -112,20 +112,3 @@ stories:
   - action: action_save_booking
   - intent: goodbye
   - action: utter_goodbye
-
-
-- story: Mostra prenotazioni con numero
-  steps:
-  - intent: show_bookings
-  - action: action_show_bookings  
-  - intent: provide_number        
-  - slot_was_set:
-    - cellulare: null            
-  - action: action_show_bookings 
-
-- story: Mostra prenotazioni (già ha numero)
-  steps:
-  - slot_was_set:
-    - cellulare: "+39 123 456 7890"            
-  - intent: show_bookings
-  - action: action_show_bookings 

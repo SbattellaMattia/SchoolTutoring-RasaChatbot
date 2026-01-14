@@ -6,12 +6,6 @@ rules:
   - intent: greet
   - action: action_greet
 
-- rule: Attiva form per prenotazione ripetizioni
-  steps:
-  - intent: request_tutoring
-  - action: tutoring_form
-  - active_loop: tutoring_form
-
 - rule: Rispondi a goodbye
   steps:
   - intent: goodbye

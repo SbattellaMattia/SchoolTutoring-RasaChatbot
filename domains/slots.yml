@@ -21,7 +21,7 @@ slots:
     influence_conversation: true
     mappings:
     - type: from_entity
-      entity: phone-number
+      entity: cellulare
 
   materia:
     type: categorical

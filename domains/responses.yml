@@ -47,7 +47,7 @@ responses:
     - text: "Confermi di voler interrompere il processo di prenotazione?"
 
   utter_next_action:
-    - text: "Perfetto! Cosa vuoi fare ora?\n📅 Prenota una lezione\nGuarda le tue prenotazioni\n📚 Vedi le materie disponibili\n👨‍🏫 Cerca altri tutor\n❓ per maggiori informazioni clicca il pulsante in basso a sinistra!"
+    - text: "Perfetto! Cosa vuoi fare ora?\n📅 Prenota una lezione\n👤 Guarda le tue prenotazioni\n📚 Vedi le materie disponibili\n👨‍🏫 Cerca altri tutor\n❓ Per maggiori informazioni clicca il pulsante in basso a sinistra!"
 
   utter_default:
     - text: "Scusa, non ho capito. Puoi riformulare?"
