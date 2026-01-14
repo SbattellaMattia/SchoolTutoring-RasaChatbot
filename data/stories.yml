@@ -13,25 +13,48 @@ stories:
   - intent: request_tutoring
   - action: tutoring_form
   - active_loop: tutoring_form
+
+# Chiede cellulare
   - slot_was_set:
-    - requested_slot: cellulare  
+    - requested_slot: cellulare
+  # Utente risponde con numero
+  - intent: provide_number
+    entities:
+      - cellulare: "+39 123 456 7890"
   - slot_was_set:
     - cellulare: "+39 123 456 7890"
+      
+  # Chiede materia
   - slot_was_set:
     - requested_slot: materia
+  # Utente risponde con materia
+  - intent: inform_slot
+    entities:
+      - materia: "matematica"
   - slot_was_set:
-    - materia: matematica
+    - materia: "matematica"
+      
+  # Chiede data
   - slot_was_set:
     - requested_slot: data
+  # Utente risponde con data
+  - intent: inform_slot
   - slot_was_set:
-    - data: domani
+    - data: "domani"
+      
+  # Chiede ora
   - slot_was_set:
     - requested_slot: ora
+  # Utente risponde con ora
+  - intent: inform_slot
   - slot_was_set:
-    - ora: 15:00
+    - ora: "15:00"
+      
+  # Form completato
   - slot_was_set:
     - requested_slot: null
   - active_loop: null
+
   - action: action_search_tutors
   - slot_was_set:
     - available_tutors: true

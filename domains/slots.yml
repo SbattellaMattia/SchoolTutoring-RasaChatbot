@@ -20,7 +20,7 @@ slots:
     type: text
     influence_conversation: true
     mappings:
-    - type: from_text
+    - type: from_entity
       entity: phone-number
 
   materia:
