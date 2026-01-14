@@ -41,6 +41,7 @@ nlu:
 
 - intent: inform
   examples: |
+    # Materie
     - [matematica](materia)
     - ho bisogno di [matematica](materia)
     - vorrei [italiano](materia)
@@ -48,19 +49,46 @@ nlu:
     - per [matematica](materia)
     - [chimica](materia) per favore
     - la materia è [italiano](materia)
+    
+    # Date combinate con ore
     - [domani](data) alle [15:00](ora)
     - per [lunedì](data) alle [16:00](ora)
     - il [10 gennaio](data) alle [14:30](ora)
     - [martedì](data) alle [17:00](ora)
+    
+    # Date semplici
     - alle [15:00](ora)
     - [domani](data)
     - per [oggi](data)
     - il [5 gennaio](data)
     - [mercoledì](data) pomeriggio
+    - [lunedì](data)
+    - [martedì](data)
+    - [giovedì](data)
+    - [venerdì](data)
+    - [sabato](data)
+    - [domenica](data)
+    
+    # Espressioni temporali
+    - oggi
+    - questo [sabato](data)
+    - questo [lunedì](data)
+    - questo [venerdì](data)
+    - questa [domenica](data)
+    - prossimo [lunedì](data)
+    - il prossimo [sabato](data)
+    - prossima [settimana](data)
+    - tra [due giorni](data)
+    - [dopodomani](data)
+
+    # Ore semplici
     - verso le [16:00](ora)
     - alle [quattro](ora)
     - alle [15](ora)
     - intorno alle [14:00](ora)
+    - [14:00](ora)
+    - [15:30](ora)
+    - [16:45](ora)
 
 - intent: affirm
   examples: |
