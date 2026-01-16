@@ -11,6 +11,45 @@ from datetime import datetime, date, timedelta
 import re
 import os
 
+
+
+ITALIAN_WEEKDAYS = {
+    0: "lunedi",
+    1: "martedi",
+    2: "mercoledi",
+    3: "giovedi",
+    4: "venerdi",
+    5: "sabato",
+    6: "domenica",
+}
+
+def _time_to_minutes(hhmm: Text) -> int:
+    h, m = hhmm.strip().split(":")
+    return int(h) * 60 + int(m)
+
+def _parse_ddmmyyyy(date_str: Text) -> datetime.date:
+    # es: "17/01/2026"
+    return datetime.strptime(date_str.strip(), "%d/%m/%Y").date()
+
+def _normalize_day(s: Text) -> Text:
+    # gestisce "lunedì" vs "lunedi"
+    return (
+        (s or "")
+        .strip()
+        .lower()
+        .replace("ì", "i")
+        .replace("à", "a")
+        .replace("è", "e")
+        .replace("é", "e")
+        .replace("ò", "o")
+        .replace("ù", "u")
+    )
+
+def _split_range(range_str: Text):
+    # es: "14:00-18:00"
+    start_s, end_s = range_str.split("-")
+    return _time_to_minutes(start_s), _time_to_minutes(end_s)
+
 class ActionGreet(Action):
     def name(self) -> Text:
         return "action_greet"
@@ -40,104 +79,106 @@ class ActionGreet(Action):
 
 
 class ActionSearchTutors(Action):
-    """Action per cercare tutor disponibili nel database CSV"""
-
     def name(self) -> Text:
         return "action_search_tutors"
 
     def run(
         self,
         dispatcher: CollectingDispatcher,
-        tracker: Tracker,
+        tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        # Recupera gli slot
         materia = tracker.get_slot("materia")
-        data = tracker.get_slot("data")
-        ora = tracker.get_slot("ora")
-    
-        # Ottieni la directory dove si trova actions.py
+        data = tracker.get_slot("data")   # atteso "DD/MM/YYYY"
+        ora = tracker.get_slot("ora")     # atteso "HH:MM"
+
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        
-        # Vai alla cartella parent (la root del progetto)
         project_root = os.path.dirname(current_dir)
-        
-        # Costruisci il path al CSV
         csv_path = os.path.join(project_root, "actions", "csv", "tutor.csv")
-        
-        # DEBUG
-        print(f"🔍 Cercando CSV in: {csv_path}")
-        print(f"📁 File esiste? {os.path.exists(csv_path)}")
 
         if not os.path.exists(csv_path):
             dispatcher.utter_message(text="Errore: database tutor non trovato.")
             return [SlotSet("available_tutors", False)]
 
         try:
-            # Carica il database
             df = pd.read_csv(csv_path)
 
+            # Normalizzazioni base
+            df["materia_norm"] = df["materia"].astype(str).str.strip().str.lower()
+            df["giorno_norm"] = df["disponibilita_giorno"].astype(str).apply(_normalize_day)
+
             # Filtra per materia
-            tutors = df[df['materia'].str.lower() == materia.lower()]
+            if not materia:
+                dispatcher.utter_message(text="Mi serve la materia per cercare i tutor.")
+                return [SlotSet("available_tutors", False)]
+
+            tutors = df[df["materia_norm"] == materia.strip().lower()].copy()
+
+            # Se ho data e ora, filtro anche per disponibilità
+            if data and ora:
+                requested_date = _parse_ddmmyyyy(data)
+                requested_day = ITALIAN_WEEKDAYS[requested_date.weekday()]  # Monday=0 [web:57]
+                requested_minutes = _time_to_minutes(ora)
+
+                # tengo solo il giorno giusto
+                tutors = tutors[tutors["giorno_norm"] == requested_day].copy()
+
+                # split intervalli e filtro per ora
+                start_end = tutors["disponibilita_ora"].astype(str).apply(_split_range)
+                tutors["start_min"] = start_end.apply(lambda x: x[0])
+                tutors["end_min"] = start_end.apply(lambda x: x[1])
+
+                tutors = tutors[
+                    (tutors["start_min"] <= requested_minutes)
+                    & (requested_minutes <= tutors["end_min"])
+                ].copy()
 
             if tutors.empty:
-                dispatcher.utter_message(
-                    text=f"Mi dispiace, non ci sono tutor disponibili per {materia}."
-                )
-                return [
-                    SlotSet("available_tutors", False),     
-                    SlotSet("tutors_list", None)         
-                ]
+                if data and ora:
+                    dispatcher.utter_message(
+                        text=f"Non ho trovato tutor per {materia} disponibili il {data} alle {ora}."
+                    )
+                else:
+                    dispatcher.utter_message(
+                        text=f"Mi dispiace, non ci sono tutor disponibili per {materia}."
+                    )
+                return [SlotSet("available_tutors", False), SlotSet("tutors_list", None)]
 
-            # TODO: Qui dovresti implementare logica più sofisticata per 
-            # verificare disponibilità in base a data/ora
-            # Per ora mostriamo tutti i tutor della materia
+            # Prepara bottoni (raggruppo per tutor, perché nel CSV hai più righe per stesso tutor)
+            tutors["nome_completo"] = tutors["nome"].astype(str).str.strip() + " " + tutors["cognome"].astype(str).str.strip()
 
-            # Prepara il messaggio con i tutor trovati
-            message = f"Ho trovato questi tutor disponibili per {materia}. Quale preferisci?\n\n"
+            # prendo un costo per tutor (se è sempre uguale)
+            grouped = tutors.groupby("nome_completo", as_index=False).agg(
+                costo_ora=("costo_ora", "first")
+            )
+
+            message = f"Ho trovato questi tutor disponibili per {materia} alle {ora} di {data}. Quale preferisci?\n\n"
 
             buttons = []
             tutors_list = []
-            
-            for idx, tutor in tutors.iterrows():
-                nome_completo = f"{tutor['nome']} {tutor['cognome']}"
-                costo = tutor['costo_ora']
-                
-                tutors_list.append({
-                    'nome': nome_completo,
-                    'costo': costo
-                })
-                
-                # Crea bottone per ogni tutor
-                button_title = f"👤 {nome_completo} - {costo}€/ora"
-                button_payload = nome_completo
-                
+            for _, row in grouped.iterrows():
+                nome_completo = row["nome_completo"]
+                costo = row["costo_ora"]
+
+                tutors_list.append({"nome": nome_completo, "costo": costo})
+
                 buttons.append({
-                    "title": button_title,
-                    "payload": button_payload
+                    "title": f"👤 {nome_completo} - {costo}€/ora",
+                    "payload": f'/choose_tutor{{"tutor":"{nome_completo}"}}'
                 })
-            
-            # Invia messaggio con bottoni
+
             dispatcher.utter_message(
                 text=message,
                 buttons=buttons,
                 button_type="vertical"
             )
 
-            return [
-                SlotSet("available_tutors", True),      # ← Per il flusso conversazionale
-                SlotSet("tutors_list", tutors_list)     # ← Per memorizzare i dati
-            ]
+            return [SlotSet("available_tutors", True), SlotSet("tutors_list", tutors_list)]
 
         except Exception as e:
-            dispatcher.utter_message(
-                text=f"Si è verificato un errore durante la ricerca: {str(e)}"
-            )
-            return [
-                SlotSet("available_tutors", False),
-                SlotSet("tutors_list", None)
-            ]
+            dispatcher.utter_message(text="Si è verificato un errore durante la ricerca.")
+            raise
 
 
 
@@ -153,23 +194,26 @@ class ValidateTutoringForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_tutoring_form"
     
+    
+
     def validate_cellulare(self, slot_value, dispatcher, tracker, domain):
         if slot_value is None:
             return {"cellulare": None}
 
-        latest_message_entities = tracker.latest_message.get("entities", [])
-        phone_entities = [
-            e for e in latest_message_entities 
-            if e.get("extractor") == "DucklingEntityExtractor" and e.get("entity") == "phone-number"
-        ]
+        raw = str(slot_value)
+        normalized = re.sub(r"[^\d+]", "", raw)
 
-        if phone_entities:
-            phone_value = phone_entities[0].get("value")
-            print(f"📞 Phone: {phone_value}")
-            return {"cellulare": phone_value}
-    
-        dispatcher.utter_message("Numero non riconosciuto. Inserisci un numero italiano valido (10 cifre): 3451234567 o +393451234567.")
+        # accetta:
+        # - 10 cifre (es 3451234567)
+        # - +39 seguito da 10 cifre (es +393451234567)
+        if re.fullmatch(r"\d{10}", normalized) or re.fullmatch(r"\+39\d{10}", normalized):
+            return {"cellulare": normalized}
+
+        dispatcher.utter_message(
+            "Numero non riconosciuto. Inserisci un numero italiano valido (10 cifre): 3451234567 o +393451234567."
+        )
         return {"cellulare": None}
+
 
 
     def validate_materia(
@@ -282,33 +326,34 @@ class ActionChooseTutor(Action):
             dispatcher.utter_message(text="Prima devi cercare i tutor disponibili.")
             return []
         
-        last_message = tracker.latest_message.get("text", "").lower().strip()
-        tutor_text = None
-        
-        # 1️⃣ METODO BOTTONI: payload = nome completo
-        if last_message in [t["nome"] for t in tutors_list]:
-            tutor_text = last_message
-            print(f"✅ Tutor selezionato da bottone: {tutor_text}")
-        
-        # 2️⃣ METODO TESTO + ENTITY: cerca tutor_name estratto
-        elif tracker.latest_message.get("entities"):
-            tutor_entities = tracker.get_latest_entity_values("tutor_name")
-            for tutor_entity in tutor_entities:
-                for tutor in tutors_list:
-                    if tutor["nome"].lower() in tutor_entity.lower() or tutor_entity.lower() in tutor["nome"].lower():
-                        tutor_text = tutor["nome"]
-                        print(f"✅ Tutor selezionato da entity: {tutor_text}")
-                        break
-                if tutor_text:
-                    break
-        
-        if tutor_text:
-            return [SlotSet("tutor_scelto", tutor_text)]
-        else:
-            dispatcher.utter_message(
-                text="Non ho capito quale tutor hai scelto. Usa i bottoni qui sopra o dimmi il nome."
-            )
-            return []
+        allowed = [t["nome"].strip() for t in tutors_list]
+
+        # 1) Metodo BOTTONI: leggi entity "tutor" dal payload /choose_tutor{"tutor":"..."}
+        tutor_entity = next(tracker.get_latest_entity_values("tutor"), None)
+        if tutor_entity:
+            tutor_entity = tutor_entity.strip()
+            # match esatto o contains
+            for name in allowed:
+                if tutor_entity.lower() == name.lower():
+                    return [SlotSet("tutor_scelto", name)]
+            for name in allowed:
+                if tutor_entity.lower() in name.lower() or name.lower() in tutor_entity.lower():
+                    return [SlotSet("tutor_scelto", name)]
+
+        # 2) Metodo testo libero: l'utente scrive "nome cognome"
+        last_text = (tracker.latest_message.get("text") or "").strip()
+        if last_text:
+            for name in allowed:
+                if last_text.lower() == name.lower():
+                    return [SlotSet("tutor_scelto", name)]
+            for name in allowed:
+                if last_text.lower() in name.lower() or name.lower() in last_text.lower():
+                    return [SlotSet("tutor_scelto", name)]
+
+        dispatcher.utter_message(
+            text="Non ho capito quale tutor hai scelto. Usa i bottoni qui sopra o dimmi il nome."
+        )
+        return []
 
 class ActionSaveBooking(Action):
     def name(self) -> Text:

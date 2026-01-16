@@ -18,10 +18,20 @@ slots:
 #============================================
   cellulare:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
-    - type: from_entity
-      entity: cellulare
+      - type: from_entity
+        entity: cellulare
+        intent: provide_number
+        conditions:
+          - active_loop: tutoring_form
+            requested_slot: cellulare
+      - type: from_entity
+        entity: cellulare
+        intent: provide_number
+        conditions:
+          - active_loop: phone_form
+            requested_slot: cellulare
 
   materia:
     type: categorical

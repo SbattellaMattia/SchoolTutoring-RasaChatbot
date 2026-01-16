@@ -27,7 +27,7 @@ pipeline:
   constrain_similarities: true
 - name: DucklingEntityExtractor
   url: "http://duckling:8000"
-  dimensions: ["time", "duration", "phone-number"]
+  dimensions: ["time", "duration"]
   locale: "it_IT"
   timezone: "Europe/Rome"
 - name: EntitySynonymMapper
