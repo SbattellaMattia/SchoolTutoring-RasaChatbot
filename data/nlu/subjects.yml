@@ -1,0 +1,10 @@
+version: "3.1"
+
+nlu:
+  - intent: ask_subjects
+    examples: |
+      - quali materie ci sono?
+      - che materie sono disponibili?
+      - fammi vedere le materie disponibili
+      - quali ripetizioni fate?
+      - elenco materie

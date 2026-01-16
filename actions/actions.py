@@ -1,6 +1,7 @@
 # actions.py
 from typing import Any, Text, Dict, List
 from urllib import parse
+from flask import json
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, AllSlotsReset
@@ -49,6 +50,36 @@ def _split_range(range_str: Text):
     # es: "14:00-18:00"
     start_s, end_s = range_str.split("-")
     return _time_to_minutes(start_s), _time_to_minutes(end_s)
+
+
+
+
+def _tutor_csv_path() -> str:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_dir)
+    return os.path.join(project_root, "actions", "csv", "tutor.csv")
+
+
+def load_subjects_from_csv(path: str) -> List[str]:
+    df = pd.read_csv(path)
+    materie = (
+        df["materia"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .unique()
+        .tolist()
+    )
+    materie.sort()
+    return materie
+
+
+
+
+
+
+
 
 class ActionGreet(Action):
     def name(self) -> Text:
@@ -473,9 +504,9 @@ class ActionShowBookings(Action):
     #                           TUTOR ACTIONS
     #===========================================================================
 
-    class ActionShowSubjects(Action):
+    class ActionShowSubjectsText(Action):
         def name(self) -> Text:
-            return "action_show_subjects"
+            return "action_show_subjects_text"
 
         def run(
             self,
@@ -483,41 +514,72 @@ class ActionShowBookings(Action):
             tracker: Tracker,
             domain: Dict[Text, Any],
         ) -> List[Dict[Text, Any]]:
-            
-            # Path al file prenotazioni
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.dirname(current_dir)
-            tutor_path = os.path.join(project_root, "actions", "csv", "tutor.csv")
-            
+
+            path = _tutor_csv_path()
+            if not os.path.exists(path):
+                dispatcher.utter_message(text="Non trovo il database dei tutor (tutor.csv).")
+                return []
+
             try:
-                # Leggi il CSV
-                df = pd.read_csv(tutor_path)
-                
-                # Ottieni le materie uniche
-                materie = df['materia'].unique().tolist()
-                
-                # Crea i bottoni per Telegram
-                buttons = []
-                for materia in materie:
-                    buttons.append({
-                        "title": materia.capitalize(),
-                        "payload": f"/seleziona_materia{{\"materia\":\"{materia}\"}}"
-                    })
-                
-                # Invia il messaggio con i bottoni
+                materie = load_subjects_from_csv(path)
+                if not materie:
+                    dispatcher.utter_message(text="Al momento non ci sono materie disponibili.")
+                    return []
+
+                pretty = "Le materie disponibili sono:\n" + "\n".join(f"📚 *{m.capitalize()}*" for m in materie) + "\n\nPresto ne saranno disponibili di nuove!"
                 dispatcher.utter_message(
-                    text="📚 Seleziona la materia per vedere i tutor disponibili:",
-                    buttons=buttons,
-                    button_type="vertical"
+                    json_message={
+                        "text": pretty,
+                        "parse_mode": "Markdown"
+                    }
                 )
-                
-            except Exception as e:
-                dispatcher.utter_message(
-                    text=f"Mi dispiace, si è verificato un errore nel caricare le materie."
-                )
-                print(f"Errore: {e}")
+                return []
             
+            
+
+            except Exception:
+                dispatcher.utter_message(text="Errore nel caricare le materie.")
+                raise
+
+
+class ActionShowSubjectsButtons(Action):
+    def name(self) -> Text:
+        return "action_show_subjects_buttons"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        path = _tutor_csv_path()
+        if not os.path.exists(path):
+            dispatcher.utter_message(text="Non trovo il database dei tutor (tutor.csv).")
             return []
+
+        try:
+            materie = load_subjects_from_csv(path)
+            if not materie:
+                dispatcher.utter_message(text="Al momento non ci sono materie disponibili.")
+                return []
+
+            buttons = []
+            for materia in materie:
+                # json.dumps evita problemi con le graffe nelle f-string
+                payload = "/seleziona_materia" + json.dumps({"materia": materia}, ensure_ascii=False)
+                buttons.append({"title": materia.capitalize(), "payload": payload})
+
+            dispatcher.utter_message(
+                text="📚 Seleziona la materia per vedere i tutor disponibili:",
+                buttons=buttons,
+                button_type="vertical",
+            )
+            return []
+
+        except Exception:
+            dispatcher.utter_message(text="Errore nel caricare le materie.")
+            raise
 
 
     class ActionShowTutorPerSubject(Action):

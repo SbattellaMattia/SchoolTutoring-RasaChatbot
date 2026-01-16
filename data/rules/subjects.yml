@@ -1,0 +1,7 @@
+version: "3.1"
+
+rules:
+- rule: Mostra materie disponibili
+  steps:
+  - intent: ask_subjects
+  - action: action_show_subjects_text

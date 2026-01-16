@@ -17,11 +17,6 @@ rules:
       - intent: security_app_detail
       - action: utter_security_app_detail
 
-  - rule: subject_list_info
-    steps:
-      - intent: subject_list_info
-      - action: action_subject_list_info
-
   - rule: bot_challenge
     steps:
       - intent: bot_challenge

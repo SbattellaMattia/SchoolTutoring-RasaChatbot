@@ -52,10 +52,6 @@ nlu:
       - Funzionalità di sicurezza
       - Protezione dati
 
-  - intent: subject_list_info
-    examples: |
-     - DA DEFINIRE
-
   - intent: bot_challenge
     examples: |
       - bot_challenge

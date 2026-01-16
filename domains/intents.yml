@@ -12,6 +12,7 @@ intents:
 - thankyou
 - book_tutoring
 - ask_subjects
+- show_subjects
 - inform_slot
 - ask_how_it_works
 - ask_availability
