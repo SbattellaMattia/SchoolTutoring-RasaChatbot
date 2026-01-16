@@ -23,6 +23,7 @@ nlu:
 - intent: request_tutoring
   examples: |
     - /ripetizioni
+    - /prenota
     - vorrei delle ripetizioni
     - ho bisogno di ripetizioni
     - cerco un tutor
@@ -39,7 +40,7 @@ nlu:
     - voglio prenotare una lezione
     - come faccio a prenotare?
 
-- intent: inform
+- intent: inform_slot
   examples: |
     
     - [matematica](materia)
@@ -49,6 +50,20 @@ nlu:
     - per [matematica](materia)
     - [chimica](materia) per favore
     - la materia è [italiano](materia)
+    - cerco ripetizioni di [francese](materia)
+    - ripetizioni di [storia](materia)
+    - vorrei studiare [fisica](materia)
+    - mi serve aiuto in [biologia](materia)
+    - per [data science](materia)
+    - ripetizioni di [informatica](materia)
+    - lezioni di [economia](materia)
+    - insegnante di [geografia](materia)
+    - tutor di [filosofia](materia)
+    - lezioni di [arte](materia)
+    - ripetizioni di [musica](materia)
+    - lezioni di [disegno](materia)
+    - insegnante di [letteratura](materia)
+    
     
     - [domani](data) alle [15:00](ora)
     - per [lunedì](data) alle [16:00](ora)
@@ -125,13 +140,6 @@ nlu:
     - [Mario Rossi](tutor_name)
     - vorrei [Laura Bianchi](tutor_name)
     - scelgo [Giuseppe Verdi](tutor_name)
-    - il primo
-    - il secondo
-    - il terzo
-    - il più economico
-    - quello che costa meno
-    - il meno caro
-    - quello più disponibile
     - prendo [Mario](tutor_name)
     - va bene [Laura](tutor_name)
     - prenoto con [Giuseppe](tutor_name)
@@ -144,6 +152,7 @@ nlu:
 
 - intent: show_bookings
   examples: |
+    - /prenotazioni
     - voglio vedere le mie prenotazioni
     - mostrami le prenotazioni
     - quali sono le mie ripetizioni

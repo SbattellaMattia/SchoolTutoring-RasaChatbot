@@ -256,20 +256,27 @@ class ValidateTutoringForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         """Valida che la materia sia tra quelle disponibili"""
 
-        materie_valide = ["matematica", "italiano", "chimica"]
-
         # Caso: il form è appena partito, non c'è ancora un valore vero
         if slot_value is None or str(slot_value).strip() == "":
             return {"materia": None}
         
-        materia_clean = str(slot_value).lower().strip()
-        if materia_clean in materie_valide:
-            return {"materia": materia_clean}
-        else:
-            dispatcher.utter_message(
-                text="Mi dispiace, al momento offriamo solo ripetizioni di matematica, italiano e chimica."
-            )
-            return {"materia": None}
+        materia = (slot_value or "").strip().lower()
+
+        # Path al file prenotazioni
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)
+        tutor_path = os.path.join(project_root, "actions", "csv", "tutor.csv")
+
+        df = pd.read_csv(tutor_path)
+        materie_csv = sorted(set(df["materia"].astype(str).str.strip().str.lower()))
+
+        if materia in materie_csv:
+            return {"materia": materia}
+
+        dispatcher.utter_message(
+            text=f"❌ Materia non disponibile. Scegli tra: {', '.join(materie_csv)}"
+        )
+        return {"materia": None}
 
     def validate_data(self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> Dict[Text, Any]:
         """Duckling: normalizza time.value in gg/mm/aaaa, rifiuta passato."""
@@ -567,7 +574,7 @@ class ActionShowSubjectsButtons(Action):
             buttons = []
             for materia in materie:
                 # json.dumps evita problemi con le graffe nelle f-string
-                payload = "/seleziona_materia" + json.dumps({"materia": materia}, ensure_ascii=False)
+                payload = "/inform_slot" + json.dumps({"materia": materia}, ensure_ascii=False)
                 buttons.append({"title": materia.capitalize(), "payload": payload})
 
             dispatcher.utter_message(
@@ -674,12 +681,11 @@ class ActionShowSubjectsButtons(Action):
             
             # Reset di tutti gli slot
             return [
-                AllSlotsReset(),
-                SlotSet("cellulare", None),
+                #AllSlotsReset(),
                 SlotSet("materia", None),
                 SlotSet("data", None),
                 SlotSet("ora", None),
                 SlotSet("available_tutors", None),
                 SlotSet("tutors_list", None),
-                SlotSet("tutor_scelto", None),
+                SlotSet("tutor", None),
             ]

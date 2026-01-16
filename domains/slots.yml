@@ -34,11 +34,8 @@ slots:
             requested_slot: cellulare
 
   materia:
-    type: categorical
-    values:
-      - matematica
-      - italiano
-      - chimica
+    type: text
+    influence_conversation: true
     mappings:
       - type: from_entity
         entity: materia

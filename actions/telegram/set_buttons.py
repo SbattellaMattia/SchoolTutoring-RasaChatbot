@@ -11,7 +11,7 @@ commands = [
     {"command": "prenota", "description": "📅 Prenota una lezione"},
     {"command": "materie", "description": "📚 Vedi le materie disponibili"},
     {"command": "tutor", "description": "👨‍🏫 Vedi i tutor disponibili per materia"},
-    {"command": "lezioni", "description": "📖 Le mie lezioni prenotate"},
+    {"command": "prenotazioni", "description": "📖 Le mie lezioni prenotate"},
     {"command": "restart", "description": "🔄 Nuova conversazione"},
     {"command": "help", "description": "❓ Come funziona il bot"}
 ]
