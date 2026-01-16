@@ -9,10 +9,10 @@ responses:
     - text: "Per favore, forniscimi il tuo numero di cellulare."
     - text: "Prima di continuare, inserisci il tuo numero di telefono."
 
-  utter_ask_materia:
-    - text: "In quale materia hai bisogno di ripetizioni?"
-    - text: "Per quale materia cerchi un tutor?"
-    - text: "Quale materia ti interessa?"
+  #utter_ask_materia:
+   # - text: "In quale materia hai bisogno di ripetizioni?"
+    #- text: "Per quale materia cerchi un tutor?"
+    #- text: "Quale materia ti interessa?"
 
   utter_ask_data:
     - text: "Per quale data vorresti la ripetizione? (es. domani, lunedì, 10 gennaio)"

@@ -11,4 +11,5 @@ actions:
   - action_show_subjects_text
   - action_show_subjects_buttons
   - action_show_tutor_per_subject
+  - action_ask_tutoring_form_materia
   - validate_tutoring_form

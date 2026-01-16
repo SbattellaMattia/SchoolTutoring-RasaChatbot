@@ -549,6 +549,50 @@ class ActionShowBookings(Action):
                 raise
 
 
+
+
+            
+
+class ActionAskTutoringFormMateria(Action):
+    def name(self) -> Text:
+        return "action_ask_tutoring_form_materia"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        path = _tutor_csv_path()
+        if not os.path.exists(path):
+            dispatcher.utter_message(text="Non trovo il database dei tutor (tutor.csv).")
+            return []
+
+        try:
+            materie = load_subjects_from_csv(path)
+            if not materie:
+                dispatcher.utter_message(text="Al momento non ci sono materie disponibili.")
+                return []
+
+            buttons = []
+            for materia in materie:
+                # json.dumps evita problemi con le graffe nelle f-string
+                payload = "/inform_slot" + json.dumps({"materia": materia}, ensure_ascii=False)
+                buttons.append({"title": materia.capitalize(), "payload": payload})
+
+            dispatcher.utter_message(
+                text="📚 Seleziona la materia oppure digita una di queste:",
+                buttons=buttons,
+                button_type="vertical",
+            )
+            return []
+
+        except Exception:
+            dispatcher.utter_message(text="Errore nel caricare le materie.")
+            raise
+
+
 class ActionShowSubjectsButtons(Action):
     def name(self) -> Text:
         return "action_show_subjects_buttons"
