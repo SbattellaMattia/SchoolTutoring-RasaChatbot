@@ -1,19 +1,45 @@
 import logging
+import os
 from typing import Any, Dict, Optional, Text
 
 import aiohttp
 from sanic import Blueprint, response
 from sanic.request import Request
 
+from rasa.core.channels.telegram import TelegramOutput
 from rasa.core.channels.telegram import TelegramInput
 
 logger = logging.getLogger(__name__)
+
+class TelegramOutputLocal(TelegramOutput):
+
+    async def send_custom_json(
+        self, recipient_id: Text, json_message: Dict[Text, Any], **kwargs: Any
+    ) -> None:
+        photo = json_message.get("photo")
+        caption = json_message.get("caption")
+        parse_mode = json_message.get("parse_mode")
+
+        if photo:
+            if os.path.exists(photo):
+                with open(photo, "rb") as f:
+                    await self.send_photo(recipient_id, f, caption=caption, parse_mode=parse_mode)
+            else:
+                # URL o file_id telegram
+                await self.send_photo(recipient_id, photo, caption=caption, parse_mode=parse_mode)
+            return
+
+        # fallback standard
+        await super().send_custom_json(recipient_id, json_message, **kwargs)
 
 
 class TelegramMetadataInput(TelegramInput):
     """Telegram channel che passa a Rasa anche nome/cognome/username come metadata
     e fa ack delle callback_query (inline keyboard) con answerCallbackQuery.
     """
+
+    def get_output_channel(self):
+        return TelegramOutputLocal(self.access_token)
 
     def get_metadata(self, request: Request) -> Optional[Dict[Text, Any]]:
         data = request.json or {}

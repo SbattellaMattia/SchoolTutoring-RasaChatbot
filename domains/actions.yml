@@ -2,6 +2,7 @@ version: "3.1"
 
 actions:
   - action_greet
+  - action_help
   - action_search_tutors
   - action_reset_slots
   - action_confirm_tutor

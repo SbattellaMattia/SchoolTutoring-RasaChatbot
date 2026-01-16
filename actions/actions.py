@@ -733,3 +733,37 @@ class ActionShowSubjectsButtons(Action):
                 SlotSet("tutors_list", None),
                 SlotSet("tutor", None),
             ]
+        
+    #===========================================================================
+    #                           CAT HELP ACTION
+    #===========================================================================
+
+    class ActionHelp(Action):
+        """Action per resettare tutti gli slot della conversazione"""
+
+        def name(self) -> Text:
+            return "action_help"
+
+        def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+        ) -> List[Dict[Text, Any]]:
+            
+
+            messaggio = "Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:\n\n"
+            messaggio += "📚 *Cerca tutor*\nTi aiuto a trovare tutor disponibili per la materia che ti serve\n\n"
+            messaggio += "📅 *Prenota lezioni*\nPrenoto le tue lezioni con il tutor scelto\n\n"
+            messaggio += "👤 *Visualizza prenotazioni*\nMostro le tue lezioni prenotate\n\n"
+            messaggio += "🚀 Per iniziare, dimmi per quale materia cerchi un tutor!\n\n"
+            messaggio += "Per vedere i comandi principali clicca sul menù in basso a sinistra. Buono studio!"
+
+            # Invia il messaggio 
+            dispatcher.utter_custom_json({
+                "photo": "/app/actions/img/cat.png",
+                "caption": messaggio,
+                "parse_mode": "Markdown"
+            })
+
+            return []
