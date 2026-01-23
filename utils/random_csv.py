@@ -24,7 +24,7 @@ def minutes_to_hhmm(m: int) -> str:
     return f"{h:02d}:{mm:02d}"
 
 def random_time_range() -> str:
-    # a volte genera "00:00-24:00" (full day) come nel tuo esempio
+    # a volte genera "00:00-24:00" (full day)
     if random.random() < 0.05:
         return "00:00-24:00"
 

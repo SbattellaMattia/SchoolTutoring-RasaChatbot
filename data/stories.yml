@@ -75,7 +75,6 @@ stories:
   - action: action_search_tutors
   - slot_was_set:
     - available_tutors: false
-  - action: utter_no_tutors_found
   - action: utter_ask_retry
   - intent: affirm
   - action: action_reset_slots
@@ -110,5 +109,5 @@ stories:
   - intent: choose_tutor
   - action: action_choose_tutor
   - action: action_save_booking
-  - intent: goodbye
-  - action: utter_goodbye
+  - action: action_reset_slots
+  - action: utter_next_action

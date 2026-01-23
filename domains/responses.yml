@@ -60,7 +60,7 @@ responses:
 
   # FAQ responses ========================================================
 
-  utter_app_detail:
+  utter_app_detail:  #implementato custom
     - text: |
         Sono il tuo assistente per trovare e prenotare lezioni con i tutor! Ecco cosa posso fare:
         

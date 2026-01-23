@@ -53,7 +53,6 @@ def _split_range(range_str: Text):
 
 
 
-
 def _tutor_csv_path() -> str:
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(current_dir)
@@ -73,10 +72,6 @@ def load_subjects_from_csv(path: str) -> List[str]:
     )
     materie.sort()
     return materie
-
-
-
-
 
 
 

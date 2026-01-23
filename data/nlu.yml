@@ -70,7 +70,6 @@ nlu:
     - il [10 gennaio](data) alle [14:30](ora)
     - [martedì](data) alle [17:00](ora)
     
-    - alle [15:00](ora)
     - [domani](data)
     - per [oggi](data)
     - il [5 gennaio](data)
@@ -94,8 +93,12 @@ nlu:
     - [dopodomani](data)
 
     - verso le [16:00](ora)
+    - alle [15:00](ora)
     - alle [quattro](ora)
     - alle [15](ora)
+    - [10](ora)
+    - [17](ora)
+    - [14](ora)
     - intorno alle [14:00](ora)
     - [14:00](ora)
     - [15:30](ora)
