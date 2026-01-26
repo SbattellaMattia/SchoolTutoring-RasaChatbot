@@ -5,6 +5,7 @@ Bot Telegram per prenotare ripetizioni scolastiche.
   <img width="300" height="429" src="https://github.com/user-attachments/assets/a07803ea-ec27-4990-adf8-b3bcb3e0904e" />
 </div>
 
+<br>**Se vuoi saperne scarica il pdf [RasaChatbot](https://github.com/user-attachments/files/24870498/RasaChatbot.pdf)! 😄**<br>
 
 ## Prerequisiti
 - Docker e Docker Compose
