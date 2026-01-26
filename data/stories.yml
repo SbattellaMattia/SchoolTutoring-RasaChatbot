@@ -78,8 +78,20 @@ stories:
   - action: utter_ask_retry
   - intent: affirm
   - action: action_reset_slots
+  # Secondo tentativo
   - action: tutoring_form
   - active_loop: tutoring_form
+  - active_loop: null
+
+  - action: action_search_tutors
+  - slot_was_set:
+    - available_tutors: true
+
+  - intent: choose_tutor
+  - action: action_choose_tutor
+  - action: action_save_booking
+  - action: action_reset_slots
+  - action: utter_next_action
 
 - story: Nessun tutor disponibile - abbandono
   steps:

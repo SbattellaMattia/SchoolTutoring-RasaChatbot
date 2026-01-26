@@ -20,9 +20,9 @@ responses:
 
   utter_ask_ora:
     - text: "A che ora ti farebbe comodo? (es. 15:00, 16:30)"
-    - text: "Quale orario preferisci?"
+    - text: "Quale orario preferisci (es. 15:00, 16:30)?"
 
-  utter_ask_tutor_scelto:
+  utter_ask_tutor:
     - text: "Quale tutor preferisci? Puoi indicare il nome o dire 'il primo' / 'il secondo'."
 
   utter_no_tutors_found:
@@ -30,8 +30,8 @@ responses:
     - text: "Purtroppo non ho trovato tutor disponibili in quella fascia oraria per {materia}."
 
   utter_ask_retry:
-    - text: "Vuoi provare con un'altra data o orario?"
-    - text: "Posso cercare con una disponibilità diversa?"
+    - text: "Vuoi provare con un'altra data o orario? Basta rispondere sì o no e possiamo riprovare."
+    - text: "Posso cercare con una disponibilità diversa se vuoi, dimmi semplicemente si o no?"
 
   utter_goodbye:
     - text: "Arrivederci! Buono studio!"

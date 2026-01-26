@@ -54,6 +54,13 @@ slots:
       - type: from_entity
         entity: ora
 
+  tutor:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text 
+        intent: choose_tutor
+
   available_tutors:
     type: bool
     influence_conversation: true 
@@ -65,13 +72,6 @@ slots:
     influence_conversation: false 
     mappings:
       - type: custom
-
-  tutor_scelto:
-    type: text
-    influence_conversation: true
-    mappings:
-      - type: from_text 
-        intent: choose_tutor
 
   requested_slot:
     type: any

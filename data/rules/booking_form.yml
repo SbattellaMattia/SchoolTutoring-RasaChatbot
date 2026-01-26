@@ -1,0 +1,14 @@
+version: "3.1"
+
+rules:
+- rule: Attiva form per prenotazione ripetizioni
+  steps:
+  - intent: request_tutoring
+  - action: tutoring_form
+  - active_loop: tutoring_form
+
+- rule: Chiusura dopo salvataggio prenotazione
+  steps:
+    - action: action_save_booking
+    - action: action_reset_slots
+    - action: utter_next_action

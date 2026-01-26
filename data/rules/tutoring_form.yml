@@ -1,8 +1,0 @@
-version: "3.1"
-
-rules:
-- rule: Attiva form per prenotazione ripetizioni
-  steps:
-  - intent: request_tutoring
-  - action: tutoring_form
-  - active_loop: tutoring_form

@@ -5,7 +5,7 @@ rules:
   - rule: app_detail
     steps:
       - intent: app_detail
-      - action: utter_app_detail
+      - action: action_help
 
   - rule: creator_app_detail
     steps:

@@ -368,20 +368,20 @@ class ActionChooseTutor(Action):
             # match esatto o contains
             for name in allowed:
                 if tutor_entity.lower() == name.lower():
-                    return [SlotSet("tutor_scelto", name)]
+                    return [SlotSet("tutor", name)]
             for name in allowed:
                 if tutor_entity.lower() in name.lower() or name.lower() in tutor_entity.lower():
-                    return [SlotSet("tutor_scelto", name)]
+                    return [SlotSet("tutor", name)]
 
         # 2) Metodo testo libero: l'utente scrive "nome cognome"
         last_text = (tracker.latest_message.get("text") or "").strip()
         if last_text:
             for name in allowed:
                 if last_text.lower() == name.lower():
-                    return [SlotSet("tutor_scelto", name)]
+                    return [SlotSet("tutor", name)]
             for name in allowed:
                 if last_text.lower() in name.lower() or name.lower() in last_text.lower():
-                    return [SlotSet("tutor_scelto", name)]
+                    return [SlotSet("tutor", name)]
 
         dispatcher.utter_message(
             text="Non ho capito quale tutor hai scelto. Usa i bottoni qui sopra o dimmi il nome."
@@ -398,7 +398,7 @@ class ActionSaveBooking(Action):
         materia = tracker.get_slot("materia")
         data = tracker.get_slot("data")
         ora = tracker.get_slot("ora")
-        tutor_scelto = tracker.get_slot("tutor_scelto")
+        tutor_scelto = tracker.get_slot("tutor")
 
         # Recupera nome/cognome utente dagli slot
         first_name = tracker.get_slot("user_first_name")

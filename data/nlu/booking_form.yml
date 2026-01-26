@@ -1,0 +1,91 @@
+version: "3.1"
+
+nlu:
+  - intent: request_tutoring
+    examples: |
+      - /ripetizioni
+      - /prenota
+      - vorrei delle ripetizioni
+      - ho bisogno di ripetizioni
+      - cerco un tutor
+      - mi servono delle lezioni
+      - avrei bisogno di aiuto per studiare
+      - cerco ripetizioni
+      - vorrei prenotare una lezione
+      - mi servirebbero delle ripetizioni
+      - devo trovare un insegnante
+      - mi servirebbe un aiuto per lo studio
+      - sto cercando qualcuno che mi aiuti
+      - posso prenotare una ripetizione?
+      - voglio prenotare una lezione
+      - come faccio a prenotare?
+
+  - intent: provide_number
+    examples: |
+      - il mio numero è [+39 123 456 7890](cellulare)
+      - [3281234567](cellulare)
+      - puoi chiamarmi al [+39 328 123 4567](cellulare)
+
+  - intent: inform_slot
+    examples: |
+      - [matematica](materia)
+      - ho bisogno di [matematica](materia)
+      - vorrei [italiano](materia)
+      - mi serve [chimica](materia)
+      - per [matematica](materia)
+      - [chimica](materia) per favore
+      - la materia è [italiano](materia)
+      - cerco ripetizioni di [francese](materia)
+      - ripetizioni di [storia](materia)
+      - vorrei studiare [fisica](materia)
+      - mi serve aiuto in [biologia](materia)
+      - per [data science](materia)
+      - ripetizioni di [informatica](materia)
+      - lezioni di [economia](materia)
+      - insegnante di [geografia](materia)
+      - tutor di [filosofia](materia)
+      - lezioni di [arte](materia)
+      - ripetizioni di [musica](materia)
+      - lezioni di [disegno](materia)
+      - insegnante di [letteratura](materia)
+      - [domani](data) alle [15:00](ora)
+      - per [lunedì](data) alle [16:00](ora)
+      - il [10 gennaio](data) alle [14:30](ora)
+      - [martedì](data) alle [17:00](ora)
+      - [domani](data)
+      - per [oggi](data)
+      - il [5 gennaio](data)
+      - [mercoledì](data) pomeriggio
+      - [lunedì](data)
+      - [martedì](data)
+      - [giovedì](data)
+      - [venerdì](data)
+      - [sabato](data)
+      - [domenica](data)
+      - [oggi](data)
+      - questo [sabato](data)
+      - questo [lunedì](data)
+      - questo [venerdì](data)
+      - questa [domenica](data)
+      - prossimo [lunedì](data)
+      - il prossimo [sabato](data)
+      - prossima [settimana](data)
+      - tra [due giorni](data)
+      - [dopodomani](data)
+      - verso le [16:00](ora)
+      - alle [15:00](ora)
+      - alle [quattro](ora)
+      - alle [15](ora)
+      - intorno alle [14:00](ora)
+      - [14:00](ora)
+      - [15:30](ora)
+      - [16:45](ora)
+
+  - intent: choose_tutor
+    examples: |
+      - [Mario Rossi](tutor)
+      - vorrei [Laura Bianchi](tutor)
+      - scelgo [Giuseppe Verdi](tutor)
+      - prendo [Mario](tutor)
+      - va bene [Laura](tutor)
+      - prenoto con [Giuseppe](tutor)

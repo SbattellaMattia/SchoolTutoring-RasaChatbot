@@ -16,7 +16,3 @@ rules:
   - intent: thankyou
   - action: utter_thankyou
 
-- rule: Help command
-  steps:
-    - intent: help
-    - action: action_help
